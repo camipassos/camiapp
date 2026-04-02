@@ -1062,7 +1062,7 @@ function renderWtChart(){
 /* ─────────── DIETA ─────────── */
 function chgDay(d){ dietOff+=d; renderDieta(); }
 function renderDieta(){
-  var k=dateStr(dietOff), d=new Date(k);
+  var k=dateStr(dietOff), d=new Date(k+'T12:00:00');
   document.getElementById('dnLbl').textContent =
     dietOff===0?'Hoje':dietOff===-1?'Ontem':
     d.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'short'});
