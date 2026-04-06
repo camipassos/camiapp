@@ -832,14 +832,14 @@ function copyPrev(){
   if(!src||!src.ex.length){ showToast('Sem treino na semana anterior'); return; }
   var cl = src.ex.map(function(e){
     return { name:e.name, muscle:e.muscle,
-      sets: e.sets.map(function(s){ return {n:s.n,m:s.m,r:'',w:''}; }) };
+      sets: e.sets.map(function(s){ return {n:s.n,m:s.m,r:s.r,w:s.w}; }) };
   });
   tday(curDay).ex = cl;
   saveDB(); buildScroller(); renderEx();
-  showToast('Copiado — preencha peso e reps');
+  showToast('Treino copiado com series, reps e peso');
 }
 function recopiar(){
-  if(window.confirm('Substituir pelo treino da semana passada?\nPeso e reps serao limpos.'))
+  if(window.confirm('Substituir pelo treino da semana passada?\nSeries, reps e peso serao copiados.'))
     copyPrev();
 }
 
