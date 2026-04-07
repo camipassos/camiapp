@@ -276,7 +276,7 @@ select{appearance:none;-webkit-appearance:none}
 .chart-bars{display:flex;align-items:flex-end;gap:5px;height:80px}
 .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
 .bar-val{font-size:7px;color:var(--dim);line-height:1}
-.bar-body{width:100%;border-radius:3px 3px 0 0;background:var(--s3);min-height:3px}
+.bar-body{width:100%;border-radius:3px 3px 0 0;background:rgba(92,107,191,.28);min-height:3px}
 .bar-body.cur{background:linear-gradient(to top,var(--neon),var(--neon2));box-shadow:0 0 8px rgba(92,107,191,.35)}
 .bar-wk{font-size:7px;color:var(--dim)}
 
@@ -303,6 +303,35 @@ select{appearance:none;-webkit-appearance:none}
 .ws-it{display:flex;flex-direction:column;gap:2px;align-items:center}
 .ws-val{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--white)}
 .ws-lbl{font-size:8px;color:var(--dim);letter-spacing:.5px;text-transform:uppercase}
+
+/* ═══════════════════ WEEKLY SUMM CARDS ═══════════════════ */
+.wk-summ-card{
+  background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r);
+  padding:14px 16px;margin-bottom:10px;
+}
+.wk-summ-hdr{
+  display:flex;align-items:center;gap:8px;margin-bottom:12px;
+}
+.wk-summ-lbl{
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;
+  font-size:16px;color:var(--neon);letter-spacing:1px;flex-shrink:0;
+}
+.wk-summ-range{font-size:10px;color:var(--mid);flex:1}
+.wk-summ-wt{
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;
+  font-size:16px;color:var(--white);flex-shrink:0;
+}
+.wk-summ-body{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.wk-mac{
+  background:var(--s3);border-radius:var(--rxs);
+  padding:8px 4px;text-align:center;
+}
+.wk-mac-val{
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;
+  font-size:18px;line-height:1;
+}
+.wk-mac-val.hi{color:var(--neon)}
+.wk-mac-lbl{font-size:8px;color:var(--mid);text-transform:uppercase;letter-spacing:.5px;margin-top:3px}
 
 /* ═══════════════════ DIETA ═══════════════════ */
 .day-nav{
@@ -561,15 +590,8 @@ select{appearance:none;-webkit-appearance:none}
       <div class="wt-inp-w"><input class="wt-in" type="number" id="inWt" placeholder="0.0"><span class="wt-kg">kg</span></div>
     </div>
 
-    <div class="sec">Media da semana</div>
-    <div class="summ">
-      <div class="summ-ttl">Resumo semanal</div>
-      <div class="summ-row"><span class="summ-k">Carboidrato medio</span><span class="summ-v" id="avgC">—</span></div>
-      <div class="summ-row"><span class="summ-k">Proteina media</span><span class="summ-v" id="avgP">—</span></div>
-      <div class="summ-row"><span class="summ-k">Gordura media</span><span class="summ-v" id="avgF">—</span></div>
-      <div class="summ-row"><span class="summ-k">Calorias medias</span><span class="summ-v hi" id="avgK">—</span></div>
-      <div class="summ-row"><span class="summ-k">Peso medio</span><span class="summ-v" id="avgW">—</span></div>
-    </div>
+    <div class="sec">Historico semanal</div>
+    <div id="allWeeksSumm"></div>
   </div>
 </div><!-- /dieta -->
 
@@ -1026,10 +1048,17 @@ function renderComp(){
 }
 
 function renderWtChart(){
-  var pts=[]; for(var i=13;i>=0;i--){
-    var k=dateStr(-i), w=parseFloat((DB.d[k]&&DB.d[k].wt)||'');
-    if(!isNaN(w)) pts.push({w:w});
-  }
+  /* build weekly average weight — up to last 12 weeks */
+  var pts=[];
+  var allWks=allDietWeeks().slice().reverse().slice(-12); /* oldest→newest, max 12 */
+  allWks.forEach(function(w){
+    var keys=daysOfWeek(w);
+    var wts=keys.map(function(k){ return DB.d&&DB.d[k]&&DB.d[k].wt?parseFloat(DB.d[k].wt):NaN; }).filter(function(v){ return !isNaN(v); });
+    if(wts.length){
+      var avg=parseFloat((wts.reduce(function(a,b){ return a+b; },0)/wts.length).toFixed(1));
+      pts.push({w:avg, lbl:'S'+w});
+    }
+  });
   var sv=document.getElementById('wtSvg'), se=document.getElementById('wtStats');
   if(pts.length<2){
     sv.innerHTML='<text x="150" y="38" text-anchor="middle" fill="#1a1f2e" font-size="10" font-family="Sora">Registre seu peso na aba Dieta</text>';
@@ -1039,7 +1068,7 @@ function renderWtChart(){
   var mn=Math.min.apply(null,ws), mx=Math.max.apply(null,ws), rng=mx-mn||1;
   var tx=function(i){ return Math.round(i/(pts.length-1)*280+10); };
   var ty=function(w){ return Math.round((1-(w-mn)/rng)*56+7); };
-  var pts2=pts.map(function(p,i){ return {x:tx(i),y:ty(p.w),w:p.w}; });
+  var pts2=pts.map(function(p,i){ return {x:tx(i),y:ty(p.w),w:p.w,lbl:p.lbl||null}; });
   var pth='M'+pts2.map(function(p){ return p.x+','+p.y; }).join(' L');
   var fil='M'+pts2[0].x+',70 L'+pts2.map(function(p){ return p.x+','+p.y; }).join(' L')+' L'+pts2[pts2.length-1].x+',70 Z';
   sv.innerHTML='<defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">'
@@ -1049,7 +1078,8 @@ function renderWtChart(){
     +'<path d="'+fil+'" fill="url(#wg)"/>'
     +'<path d="'+pth+'" fill="none" stroke="#5C6BBF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'
     +pts2.map(function(p){ return '<circle cx="'+p.x+'" cy="'+p.y+'" r="2.5" fill="#5C6BBF"/>'; }).join('')
-    +pts2.map(function(p,i){ return (i===0||i===pts2.length-1)?'<text x="'+p.x+'" y="'+(p.y-7)+'" text-anchor="middle" fill="#3d4a5c" font-size="7" font-family="Sora">'+p.w+'</text>':''; }).join('');
+    +pts2.map(function(p,i){ return (i===0||i===pts2.length-1)?'<text x="'+p.x+'" y="'+(p.y-7)+'" text-anchor="middle" fill="#3d4a5c" font-size="7" font-family="Sora">'+p.w+'</text>':''; }).join('')
+    +pts2.map(function(p){ return p.lbl?'<text x="'+p.x+'" y="68" text-anchor="middle" fill="#3d4a5c" font-size="7" font-family="Sora">'+p.lbl+'</text>':''; }).join('');
   var avg=(ws.reduce(function(a,b){ return a+b; },0)/ws.length).toFixed(1);
   var diff=(ws[ws.length-1]-ws[0]).toFixed(1), dc=+diff<0?'#5C6BBF':+diff>0?'#ff3366':'#3d4a5c';
   se.innerHTML=
@@ -1085,25 +1115,70 @@ function calcMac(){
   document.getElementById('cmP').textContent=p+'g';
   document.getElementById('cmF').textContent=f+'g';
 }
+/* ── collect all week keys from diet data ── */
+function allDietWeeks(){
+  if(!DB.d) return [];
+  var seen={}, wks=[];
+  Object.keys(DB.d).forEach(function(k){
+    var w=weekNum(k);
+    if(!seen[w]){ seen[w]=1; wks.push(w); }
+  });
+  wks.sort(function(a,b){ return b-a; }); /* newest first */
+  return wks;
+}
+
+/* ── get days belonging to a given week number ── */
+function daysOfWeek(w){
+  /* find any key in that week, then derive Mon-Sun */
+  var sample=null;
+  if(DB.d) Object.keys(DB.d).forEach(function(k){ if(weekNum(k)===w) sample=k; });
+  if(!sample) return [];
+  var base=new Date(sample+'T12:00:00');
+  var dow=base.getDay()||7;
+  base.setDate(base.getDate()-(dow-1));
+  var keys=[];
+  for(var i=0;i<7;i++){
+    var d=new Date(base); d.setDate(base.getDate()+i);
+    keys.push(localKey(d));
+  }
+  return keys;
+}
+
 function renderSumm(){
-  if(!DB.d){ clrSumm(); return; }
-  var now=new Date(), dow=now.getDay()||7, mon=new Date(now);
-  mon.setDate(now.getDate()-(dow-1));
-  var keys=[]; for(var i=0;i<7;i++){ var dd=new Date(mon); dd.setDate(mon.getDate()+i); keys.push(dd.toISOString().slice(0,10)); }
-  var ents=keys.map(function(k){ return DB.d[k]; }).filter(Boolean);
-  if(!ents.length){ clrSumm(); return; }
-  var avg=function(f){ return Math.round(ents.reduce(function(s,e){ return s+(parseFloat(e[f])||0); },0)/ents.length); };
-  var ac=avg('c'), ap=avg('p'), af=avg('f'), ak=Math.round(ac*4+ap*4+af*9);
-  var ws=ents.filter(function(e){ return e.wt; }).map(function(e){ return parseFloat(e.wt); });
-  document.getElementById('avgC').textContent=ac+' g';
-  document.getElementById('avgP').textContent=ap+' g';
-  document.getElementById('avgF').textContent=af+' g';
-  document.getElementById('avgK').textContent=ak.toLocaleString('pt-BR')+' kcal';
-  document.getElementById('avgW').textContent=ws.length?(ws.reduce(function(a,b){ return a+b; },0)/ws.length).toFixed(1)+' kg':'—';
+  var el=document.getElementById('allWeeksSumm');
+  var wks=allDietWeeks();
+  if(!wks.length){ el.innerHTML='<div class="empty">Nenhum dado registrado ainda.</div>'; return; }
+  var html='';
+  wks.forEach(function(w){
+    var keys=daysOfWeek(w);
+    var ents=keys.map(function(k){ return DB.d&&DB.d[k]; }).filter(Boolean);
+    if(!ents.length) return;
+    var avg=function(f){ return Math.round(ents.reduce(function(s,e){ return s+(parseFloat(e[f])||0); },0)/ents.length); };
+    var ac=avg('c'), ap=avg('p'), af=avg('f'), ak=Math.round(ac*4+ap*4+af*9);
+    var wts=ents.filter(function(e){ return e.wt; }).map(function(e){ return parseFloat(e.wt); });
+    var avgWt=wts.length?(wts.reduce(function(a,b){ return a+b; },0)/wts.length).toFixed(1)+'kg':'—';
+    /* label: first and last day of week with data */
+    var dataDays=keys.filter(function(k){ return DB.d&&DB.d[k]; });
+    var d0=new Date(dataDays[0]+'T12:00:00'), d1=new Date(dataDays[dataDays.length-1]+'T12:00:00');
+    var fmt2=function(d){ return d.toLocaleDateString('pt-BR',{day:'numeric',month:'short'}); };
+    var range=dataDays.length>1?fmt2(d0)+' – '+fmt2(d1):fmt2(d0);
+    html+='<div class="wk-summ-card">'
+      +'<div class="wk-summ-hdr">'
+        +'<span class="wk-summ-lbl">Semana '+w+'</span>'
+        +'<span class="wk-summ-range">'+range+'</span>'
+        +'<span class="wk-summ-wt">'+avgWt+'</span>'
+      +'</div>'
+      +'<div class="wk-summ-body">'
+        +'<div class="wk-mac"><div class="wk-mac-val" style="color:var(--sky)">'+ac+'g</div><div class="wk-mac-lbl">Carb</div></div>'
+        +'<div class="wk-mac"><div class="wk-mac-val" style="color:var(--neon)">'+ap+'g</div><div class="wk-mac-lbl">Prot</div></div>'
+        +'<div class="wk-mac"><div class="wk-mac-val" style="color:var(--amb)">'+af+'g</div><div class="wk-mac-lbl">Gord</div></div>'
+        +'<div class="wk-mac"><div class="wk-mac-val hi">'+ak.toLocaleString('pt-BR')+'</div><div class="wk-mac-lbl">kcal</div></div>'
+      +'</div>'
+    +'</div>';
+  });
+  el.innerHTML=html||'<div class="empty">Nenhum dado registrado ainda.</div>';
 }
-function clrSumm(){
-  ['avgC','avgP','avgF','avgK','avgW'].forEach(function(id){ document.getElementById(id).textContent='—'; });
-}
+function clrSumm(){ document.getElementById('allWeeksSumm').innerHTML=''; }
 
 /* ─────────── FAB SAVE ─────────── */
 function fabSave(){
