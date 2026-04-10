@@ -289,7 +289,7 @@ select{appearance:none;-webkit-appearance:none}
 .comp-bw{display:flex;align-items:center;gap:6px}
 .comp-track{flex:1;height:5px;background:var(--s3);border-radius:3px;overflow:hidden}
 .comp-fill{height:100%;border-radius:3px}
-.comp-fill.prev{background:var(--s4)}
+/* prev bar color moved below */
 .comp-fill.curr{background:var(--neon);box-shadow:0 0 4px rgba(92,107,191,.45)}
 .comp-lbl{font-size:8px;color:var(--dim);width:28px;text-align:right;flex-shrink:0}
 .leg{display:flex;gap:14px;margin-bottom:12px}
@@ -481,6 +481,35 @@ select{appearance:none;-webkit-appearance:none}
 .toast.on{transform:translateX(-50%) translateY(0)}
 .hide{display:none!important}
 .empty{text-align:center;color:var(--dim);font-size:12px;padding:28px 0;line-height:1.8}
+/* ── drag handle ── */
+.drag-handle{
+  display:flex;align-items:center;justify-content:center;
+  padding:0 6px;cursor:grab;color:var(--dim);font-size:14px;flex-shrink:0;
+  touch-action:none;
+}
+.drag-handle:active{cursor:grabbing}
+.ex-card.dragging{opacity:.4;border:1px dashed var(--nln)}
+.ex-card.drag-over{border-color:var(--neon);box-shadow:0 0 0 1px var(--neon)}
+
+/* ── week nav in header pill ── */
+.wk-pill-nav{
+  display:flex;align-items:center;gap:5px;
+  background:var(--ndim);border:1px solid var(--nln);border-radius:20px;
+  padding:2px 6px 2px 4px;
+}
+.wk-nav-sm{
+  background:none;border:none;color:var(--neon);
+  font-size:14px;line-height:1;padding:1px 3px;cursor:pointer;
+}
+.wk-pill-txt{
+  color:var(--neon);font-size:9px;font-weight:600;
+  letter-spacing:1.5px;text-transform:uppercase;min-width:60px;text-align:center;
+}
+
+/* ── comparativo prev bar: visible color ── */
+.comp-fill.prev{background:rgba(255,170,51,.55)}
+.comp-fill.curr{background:var(--neon);box-shadow:0 0 4px rgba(92,107,191,.45)}
+.comp-legend-prev{color:rgba(255,170,51,.9)}
 </style>
 </head>
 <body>
@@ -491,7 +520,11 @@ select{appearance:none;-webkit-appearance:none}
   <div class="logo">CAMI</div>
   <div class="hdr-right">
     <div class="hdr-date" id="hdrDate"></div>
-    <div class="wk-pill"  id="wkPill">Semana 1</div>
+    <div class="wk-pill-nav">
+      <button class="wk-nav-sm" onclick="hdrWkNav(-1)">&#8592;</button>
+      <span class="wk-pill-txt" id="wkPill">Semana 1</span>
+      <button class="wk-nav-sm" onclick="hdrWkNav(1)">&#8594;</button>
+    </div>
   </div>
 </div>
 
@@ -510,7 +543,11 @@ select{appearance:none;-webkit-appearance:none}
 
   <!-- sub: dias -->
   <div id="sub-dias" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
-    <div class="dscroll" id="dayScroller"></div>
+    <div style="display:flex;align-items:center;background:var(--bg);flex-shrink:0;padding:0 8px 0 4px">
+      <button class="wn-btn" style="flex-shrink:0;margin:8px 4px 4px" onclick="scrollerWkNav(-1)">&#8592;</button>
+      <div class="dscroll" id="dayScroller" style="flex:1;padding-left:0;padding-right:0"></div>
+      <button class="wn-btn" style="flex-shrink:0;margin:8px 4px 4px" onclick="scrollerWkNav(1)">&#8594;</button>
+    </div>
     <div class="sbody">
       <div class="sec">Exercicios</div>
       <div id="exList"></div>
@@ -540,7 +577,7 @@ select{appearance:none;-webkit-appearance:none}
     <div class="comp-card">
       <div class="comp-ttl">Volume por grupo muscular</div>
       <div class="leg">
-        <div class="leg-item"><div class="leg-dot" style="background:var(--s4)"></div>Sem. anterior</div>
+        <div class="leg-item"><div class="leg-dot" style="background:rgba(255,170,51,.7)"></div><span class="comp-legend-prev">Sem. anterior</span></div>
         <div class="leg-item"><div class="leg-dot" style="background:var(--neon)"></div>Sem. atual</div>
       </div>
       <div id="compRows"></div>
@@ -688,11 +725,12 @@ var MUS = ['Peito','Costas','Ombro','Biceps','Triceps','Quadriceps',
            'Posterior','Gluteo','Panturrilha','Abdomen','Trapezio','Antebraco'];
 
 /* ─────────── STATE ─────────── */
-var curTab  = 'treino';
-var curSub  = 'dias';
-var curDay  = '';   /* YYYY-MM-DD */
-var curWk   = 1;
-var dietOff = 0;
+var curTab     = 'treino';
+var curSub     = 'dias';
+var curDay     = '';   /* YYYY-MM-DD */
+var curWk      = 1;    /* evolucao week */
+var scrollerWk = 0;    /* 0 = current week; negative = weeks back */
+var dietOff    = 0;
 
 /* ─────────── BOOT ─────────── */
 window.addEventListener('DOMContentLoaded', function(){
@@ -763,11 +801,19 @@ function wkVol(w){
     .reduce(function(a,k){ return a+DB.t[k].ex.reduce(function(b,e){ return b+eVol(e); },0); },0);
 }
 function musSets(w){
+  /* returns { muscle: {sets, reps, vol} } */
   var c={};
   Object.keys(DB.t).filter(function(k){ return weekNum(k)===w; })
     .forEach(function(k){
       DB.t[k].ex.forEach(function(e){
-        if(e.muscle) c[e.muscle]=(c[e.muscle]||0)+e.sets.length;
+        if(!e.muscle) return;
+        if(!c[e.muscle]) c[e.muscle]={sets:0,reps:0,vol:0};
+        e.sets.forEach(function(s){
+          var r=parseFloat(s.r)||0, wt=parseFloat(s.w)||0;
+          c[e.muscle].sets++;
+          c[e.muscle].reps+=r;
+          c[e.muscle].vol+=r*wt;
+        });
       });
     });
   return c;
@@ -778,8 +824,39 @@ function setHeader(){
   var d = new Date();
   document.getElementById('hdrDate').textContent =
     d.toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short'}).toUpperCase();
-  document.getElementById('wkPill').textContent  = 'Semana ' + weekNum(today());
-  document.getElementById('wnLbl').textContent   = 'Semana ' + curWk;
+  refreshWkPill();
+  document.getElementById('wnLbl').textContent = 'Semana ' + curWk;
+}
+function refreshWkPill(){
+  var base = weekNum(today()) + scrollerWk;
+  document.getElementById('wkPill').textContent = 'Semana ' + Math.max(1, base);
+}
+function hdrWkNav(d){
+  scrollerWk += d;
+  var wk = Math.max(1, weekNum(today()) + scrollerWk);
+  refreshWkPill();
+  /* jump scroller to that week */
+  var ref = wkToMonday(wk);
+  curDay = ref;
+  buildScroller();
+  renderEx();
+}
+function scrollerWkNav(d){
+  scrollerWk += d;
+  var wk = Math.max(1, weekNum(today()) + scrollerWk);
+  refreshWkPill();
+  var ref = wkToMonday(wk);
+  curDay = ref;
+  buildScroller();
+  renderEx();
+}
+/* get Monday ISO date for a given week number */
+function wkToMonday(targetWk){
+  /* walk from firstMonday + (targetWk-1)*7 days */
+  var fm = firstMonday();
+  var d  = new Date(fm);
+  d.setDate(d.getDate() + (targetWk - 1) * 7);
+  return localKey(d);
 }
 
 /* ─────────── MAIN TAB SWITCH ─────────── */
@@ -823,16 +900,17 @@ function localKey(d){
 function buildScroller(){
   var sc = document.getElementById('dayScroller');
   sc.innerHTML = '';
-  var td = today(), base = new Date(td+'T12:00:00');
-  var dow = base.getDay() || 7;          /* 1=Mon */
-  base.setDate(base.getDate() - (dow-1));/* Monday */
+  var td   = today();
+  var wk   = Math.max(1, weekNum(td) + scrollerWk);
+  var monK = wkToMonday(wk);
+  var base = new Date(monK+'T12:00:00');
   for(var i=0;i<7;i++){
     var d = new Date(base); d.setDate(base.getDate()+i);
     var k = localKey(d);
     var p = document.createElement('div');
     p.className = 'dpill'
-      + (k===td      ? ' today'    : '')
-      + (k===curDay  ? ' on'       : '')
+      + (k===td     ? ' today' : '')
+      + (k===curDay ? ' on'    : '')
       + (DB.t[k]&&DB.t[k].ex.length ? ' has-data' : '');
     p.innerHTML = '<div class="dlb">'+DPT[d.getDay()]+'</div>'
                 + '<div class="dn">'+d.getDate()+'</div>'
@@ -905,15 +983,25 @@ function renderEx(){
 
   day.ex.forEach(function(ex,ei){
     var vol = eVol(ex);
-    var c   = document.createElement('div'); c.className='ex-card';
+    var c   = document.createElement('div');
+    c.className='ex-card';
+    c.setAttribute('draggable','true');
+    c.dataset.ei = ei;
+    c.addEventListener('dragstart', onDragStart);
+    c.addEventListener('dragover',  onDragOver);
+    c.addEventListener('drop',      onDrop);
+    c.addEventListener('dragend',   onDragEnd);
+    /* touch drag */
+    c.addEventListener('touchstart', onTouchStart, {passive:true});
     c.innerHTML =
-      '<div class="ex-hdr" onclick="togEx('+ei+')">'
-        +'<div class="ex-info">'
+      '<div class="ex-hdr">'
+        +'<div class="drag-handle" title="Arrastar">&#9776;</div>'
+        +'<div class="ex-info" onclick="togEx('+ei+')" style="flex:1;min-width:0">'
           +'<div class="ex-nm">'+esc(ex.name)+'</div>'
           +'<div class="ex-sb">'+(esc(ex.muscle)||'—')+' · '+ex.sets.length+' serie'+(ex.sets.length!==1?'s':'')+'</div>'
         +'</div>'
         +'<div class="ex-vol" id="evol-'+ei+'">'+(vol>0?fmtN(vol):'0')+'<small> kg</small></div>'
-        +'<div class="chv" id="chv-'+ei+'">&#8964;</div>'
+        +'<div class="chv" id="chv-'+ei+'" onclick="togEx('+ei+')">&#8964;</div>'
       +'</div>'
       +'<div class="sets-wrap" id="sw-'+ei+'">'
         +'<div class="th-row">'
@@ -1012,8 +1100,16 @@ function renderEvol(){ renderMusGrid(); renderVolChart(); renderComp(); renderWt
 function renderMusGrid(){
   var c=musSets(curWk), g=document.getElementById('musGrid'), ks=Object.keys(c);
   if(!ks.length){ g.innerHTML='<div class="mus-empty">Nenhum dado para esta semana</div>'; return; }
-  g.innerHTML=ks.sort(function(a,b){ return c[b]-c[a]; })
-    .map(function(m){ return '<div class="mus-card"><div class="mus-nm">'+m+'</div><div class="mus-n">'+c[m]+'</div><div class="mus-sb">series</div></div>'; }).join('');
+  g.innerHTML=ks.sort(function(a,b){ return (c[b].sets||0)-(c[a].sets||0); })
+    .map(function(m){
+      var s=c[m].sets||0, r=c[m].reps||0;
+      return '<div class="mus-card">'
+        +'<div class="mus-nm">'+m+'</div>'
+        +'<div class="mus-n">'+s+'</div>'
+        +'<div class="mus-sb">series</div>'
+        +'<div class="mus-sb" style="color:var(--neon2);margin-top:3px">'+r+' reps</div>'
+      +'</div>';
+    }).join('');
 }
 
 function renderVolChart(){
@@ -1032,17 +1128,20 @@ function renderVolChart(){
 }
 
 function renderComp(){
-  var prev=musSets(curWk-1), curr=musSets(curWk), ms=[]; var seen={};
-  Object.keys(curr).concat(Object.keys(prev)).forEach(function(m){ if(!seen[m]){ seen[m]=1; ms.push(m); } });
+  var prevRaw=musSets(curWk-1), currRaw=musSets(curWk), ms=[]; var seen={};
+  Object.keys(currRaw).concat(Object.keys(prevRaw)).forEach(function(m){ if(!seen[m]){ seen[m]=1; ms.push(m); } });
   var el=document.getElementById('compRows');
   if(!ms.length){ el.innerHTML='<div class="empty">Sem dados para comparar</div>'; return; }
-  var mx=Math.max.apply(null,ms.map(function(m){ return Math.max(curr[m]||0,prev[m]||0); }).concat([1]));
+  /* use volume (reps × weight) per muscle */
+  var cv=function(obj,m){ return obj[m]?obj[m].vol||0:0; };
+  var mx=Math.max.apply(null,ms.map(function(m){ return Math.max(cv(currRaw,m),cv(prevRaw,m)); }).concat([1]));
+  function fmtVol(v){ return v>=1000?Math.round(v/100)/10+'k':Math.round(v)+''; }
   el.innerHTML=ms.map(function(m){
-    var c=curr[m]||0, p=prev[m]||0;
+    var c=cv(currRaw,m), p=cv(prevRaw,m);
     return '<div class="comp-row"><div class="comp-mus">'+m+'</div>'
       +'<div class="comp-bars">'
-        +'<div class="comp-bw"><div class="comp-track"><div class="comp-fill prev" style="width:'+Math.round(p/mx*100)+'%"></div></div><div class="comp-lbl">'+p+'s</div></div>'
-        +'<div class="comp-bw"><div class="comp-track"><div class="comp-fill curr" style="width:'+Math.round(c/mx*100)+'%"></div></div><div class="comp-lbl">'+c+'s</div></div>'
+        +'<div class="comp-bw"><div class="comp-track"><div class="comp-fill prev" style="width:'+Math.round(p/mx*100)+'%"></div></div><div class="comp-lbl">'+fmtVol(p)+'</div></div>'
+        +'<div class="comp-bw"><div class="comp-track"><div class="comp-fill curr" style="width:'+Math.round(c/mx*100)+'%"></div></div><div class="comp-lbl">'+fmtVol(c)+'</div></div>'
       +'</div></div>';
   }).join('');
 }
@@ -1179,6 +1278,83 @@ function renderSumm(){
   el.innerHTML=html||'<div class="empty">Nenhum dado registrado ainda.</div>';
 }
 function clrSumm(){ document.getElementById('allWeeksSumm').innerHTML=''; }
+
+
+/* ─────────── DRAG TO REORDER ─────────── */
+var dragSrcEi = null;
+
+function onDragStart(e){
+  dragSrcEi = parseInt(this.dataset.ei);
+  this.classList.add('dragging');
+  if(e.dataTransfer) e.dataTransfer.effectAllowed='move';
+}
+function onDragOver(e){
+  e.preventDefault();
+  document.querySelectorAll('.ex-card').forEach(function(c){ c.classList.remove('drag-over'); });
+  this.classList.add('drag-over');
+  if(e.dataTransfer) e.dataTransfer.dropEffect='move';
+}
+function onDrop(e){
+  e.preventDefault();
+  var targetEi = parseInt(this.dataset.ei);
+  if(dragSrcEi===null || dragSrcEi===targetEi) return;
+  var exs = tday(curDay).ex;
+  var moved = exs.splice(dragSrcEi, 1)[0];
+  exs.splice(targetEi, 0, moved);
+  saveDB(); pushTreino(curDay);
+  renderEx();
+}
+function onDragEnd(){
+  document.querySelectorAll('.ex-card').forEach(function(c){
+    c.classList.remove('dragging','drag-over');
+  });
+  dragSrcEi = null;
+}
+
+/* touch drag (long-press 400ms then move) */
+var touchDragEi=null, touchClone=null, touchStartY=0;
+function onTouchStart(e){
+  var card=this;
+  var ei=parseInt(card.dataset.ei);
+  var timer=setTimeout(function(){
+    touchDragEi=ei;
+    card.classList.add('dragging');
+    touchStartY=e.touches[0].clientY;
+    document.addEventListener('touchmove', onTouchMove, {passive:false});
+    document.addEventListener('touchend',  onTouchEnd);
+  },400);
+  card.addEventListener('touchend',function(){ clearTimeout(timer); },{once:true});
+  card.addEventListener('touchmove',function(){ clearTimeout(timer); },{once:true,passive:true});
+}
+function onTouchMove(e){
+  if(touchDragEi===null) return;
+  e.preventDefault();
+  var y=e.touches[0].clientY;
+  var els=document.querySelectorAll('.ex-card');
+  els.forEach(function(c){ c.classList.remove('drag-over'); });
+  var target=document.elementFromPoint(e.touches[0].clientX, y);
+  var card=target&&target.closest('.ex-card');
+  if(card) card.classList.add('drag-over');
+}
+function onTouchEnd(e){
+  if(touchDragEi===null) return;
+  var y=e.changedTouches[0].clientY;
+  var target=document.elementFromPoint(e.changedTouches[0].clientX, y);
+  var card=target&&target.closest('.ex-card');
+  if(card){
+    var targetEi=parseInt(card.dataset.ei);
+    if(targetEi!==touchDragEi){
+      var exs=tday(curDay).ex;
+      var moved=exs.splice(touchDragEi,1)[0];
+      exs.splice(targetEi,0,moved);
+      saveDB(); pushTreino(curDay);
+    }
+  }
+  touchDragEi=null;
+  document.removeEventListener('touchmove',onTouchMove);
+  document.removeEventListener('touchend', onTouchEnd);
+  renderEx();
+}
 
 /* ─────────── FAB SAVE ─────────── */
 function fabSave(){
