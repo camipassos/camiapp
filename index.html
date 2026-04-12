@@ -584,6 +584,40 @@ select{appearance:none;-webkit-appearance:none}
   font-size:24px;letter-spacing:2px;margin-bottom:6px;color:var(--neon);
 }
 .fin-sub{font-size:11px;color:var(--mid);margin-bottom:16px}
+
+/* ── proto collapsible sub-sections ── */
+.proto-sub{border:1px solid var(--bdr);border-radius:var(--rsm);margin-bottom:8px;overflow:hidden}
+.proto-sub-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 14px;cursor:pointer;background:var(--s2);
+  font-size:12px;font-weight:600;color:var(--white);letter-spacing:.3px;
+}
+.proto-sub-hdr .chv{width:22px;height:22px;font-size:9px}
+.proto-sub-body{display:none;padding:12px 14px;background:var(--s1)}
+.proto-sub-body.on{display:block}
+
+/* full workout list inside proto */
+.proto-day-block{margin-bottom:14px}
+.proto-day-lbl{
+  font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;
+  color:var(--mid);margin-bottom:6px;display:flex;align-items:center;gap:8px;
+}
+.proto-day-lbl::after{content:'';flex:1;height:1px;background:var(--bdr)}
+.proto-ex-row{
+  background:var(--s3);border-radius:var(--rsm);padding:10px 12px;margin-bottom:6px;
+}
+.proto-ex-nm{font-weight:600;font-size:13px;margin-bottom:4px}
+.proto-ex-muscle{font-size:10px;color:var(--mid);margin-bottom:6px}
+.proto-sets-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.proto-sets-tbl th{
+  color:var(--dim);font-weight:600;font-size:8px;letter-spacing:1px;
+  text-transform:uppercase;padding:0 4px 4px;text-align:center;
+}
+.proto-sets-tbl td{
+  color:var(--white);padding:3px 4px;text-align:center;
+  border-top:1px solid var(--dim);
+}
+.proto-sets-tbl td.vol{color:var(--neon);font-weight:600}
 </style>
 </head>
 <body>
@@ -604,9 +638,9 @@ select{appearance:none;-webkit-appearance:none}
 
 <!-- MAIN TABS -->
 <div class="main-tabs">
+  <div class="mtab"    id="mt-historico" onclick="gotoMain('historico')">Anterior</div>
   <div class="mtab on" id="mt-treino"    onclick="gotoMain('treino')">Treino</div>
   <div class="mtab"    id="mt-dieta"     onclick="gotoMain('dieta')">Dieta</div>
-  <div class="mtab"    id="mt-historico" onclick="gotoMain('historico')">Anterior</div>
 </div>
 
 <!-- ══ TREINO VIEW ══ -->
@@ -1573,80 +1607,153 @@ function renderProtos(){
   var list  = document.getElementById('protoList');
   var empty = document.getElementById('protoEmpty');
   if(!DB.proto||!DB.proto.length){
-    list.innerHTML=''; empty.style.display='';
+    list.innerHTML=''; empty.style.display='block';
     return;
   }
   empty.style.display='none';
-  var protos = DB.proto.slice().reverse(); /* newest first */
+  var protos = DB.proto.slice().reverse();
   list.innerHTML='';
   protos.forEach(function(proto){
     var d0 = new Date(proto.startDate+'T12:00:00');
     var d1 = new Date(proto.endDate+'T12:00:00');
     var fmtD = function(d){ return d.toLocaleDateString('pt-BR',{day:'numeric',month:'short',year:'2-digit'}); };
     var dateRange = fmtD(d0)+' – '+fmtD(d1);
-    var wks = proto.weeks || '?';
+    var pid = proto.id;
 
-    /* muscle volume rows */
-    var musHtml = '';
+    /* ── 1. Series por grupo muscular (not volume) ── */
     var musKeys = Object.keys(proto.musVol||{});
-    if(musKeys.length){
-      musHtml = '<div class="proto-mus-grid">'
-        + musKeys.sort(function(a,b){ return (proto.musVol[b].vol||0)-(proto.musVol[a].vol||0); })
-            .map(function(m){
-              var v=proto.musVol[m];
-              var vStr = v.vol>=1000 ? Math.round(v.vol/100)/10+'k' : Math.round(v.vol||0)+'';
-              return '<div class="proto-mus-card">'
-                +'<div class="proto-mus-nm">'+m+'</div>'
-                +'<div class="proto-mus-v">'+vStr+'</div>'
-                +'<div class="proto-mus-sb">kg vol</div>'
-                +'</div>';
-            }).join('')
-        + '</div>';
-    } else {
-      musHtml = '<div class="empty" style="padding:10px 0">Sem dados de treino</div>';
-    }
+    var musHtml = musKeys.length
+      ? '<div class="proto-mus-grid">'
+          + musKeys.sort(function(a,b){ return (proto.musVol[b].sets||0)-(proto.musVol[a].sets||0); })
+              .map(function(m){
+                var v = proto.musVol[m];
+                return '<div class="proto-mus-card">'
+                  +'<div class="proto-mus-nm">'+m+'</div>'
+                  +'<div class="proto-mus-v">'+(v.sets||0)+'</div>'
+                  +'<div class="proto-mus-sb">series</div>'
+                  +'</div>';
+              }).join('')
+          +'</div>'
+      : '<div class="empty" style="padding:8px 0">Sem dados</div>';
 
-    /* diet summary */
+    /* ── 2. Dieta ── */
     var da = proto.dietAvg||{};
     var fwStr = proto.finalWt ? proto.finalWt+' kg' : '—';
     var dietHtml =
       '<div class="proto-diet-row"><span class="proto-diet-k">Peso final</span><span class="proto-diet-v">'+fwStr+'</span></div>'
-      +'<div class="proto-diet-row"><span class="proto-diet-k">Kcal medias (ult. semana)</span><span class="proto-diet-v hi">'+(da.kcal||0).toLocaleString('pt-BR')+'</span></div>'
-      +'<div class="proto-diet-row"><span class="proto-diet-k">Carb medio</span><span class="proto-diet-v">'+(da.c||0)+'g</span></div>'
-      +'<div class="proto-diet-row"><span class="proto-diet-k">Prot medio</span><span class="proto-diet-v">'+(da.p||0)+'g</span></div>'
-      +'<div class="proto-diet-row"><span class="proto-diet-k">Gord media</span><span class="proto-diet-v">'+(da.f||0)+'g</span></div>';
+      +'<div class="proto-diet-row"><span class="proto-diet-k">Kcal medias</span><span class="proto-diet-v hi">'+(da.kcal||0).toLocaleString('pt-BR')+'</span></div>'
+      +'<div class="proto-diet-row"><span class="proto-diet-k">Carb</span><span class="proto-diet-v">'+(da.c||0)+'g</span></div>'
+      +'<div class="proto-diet-row"><span class="proto-diet-k">Prot</span><span class="proto-diet-v">'+(da.p||0)+'g</span></div>'
+      +'<div class="proto-diet-row"><span class="proto-diet-k">Gord</span><span class="proto-diet-v">'+(da.f||0)+'g</span></div>';
+
+    /* ── 3. Treino completo ── */
+    var treinoHtml = buildFullWorkoutHtml(proto.treino||{});
 
     var card = document.createElement('div');
     card.className = 'proto-card';
     card.innerHTML =
-      '<div class="proto-hdr" onclick="togProto('+proto.id+')">'
+      /* header — click to expand/collapse the whole card body */
+      '<div class="proto-hdr" onclick="togProto('+pid+')">'
         +'<div class="proto-info">'
           +'<div class="proto-name">'+proto.name+'</div>'
-          +'<div class="proto-dates">'+dateRange+' &middot; '+wks+' sem.</div>'
+          +'<div class="proto-dates">'+dateRange+' &middot; '+(proto.weeks||'?')+' sem.</div>'
         +'</div>'
-        +'<span class="proto-badge">Ver</span>'
+        +'<div class="chv" id="chv-p'+pid+'">&#8964;</div>'
       +'</div>'
-      +'<div class="proto-body" id="pb-'+proto.id+'">'
-        +'<div class="proto-section">'
-          +'<div class="proto-sec-ttl">Volume por grupo muscular</div>'
-          +musHtml
+
+      /* body — hidden by default, opens on click */
+      +'<div class="proto-body" id="pb-'+pid+'">'
+
+        /* sub-section: Series por grupo muscular */
+        +'<div class="proto-sub">'
+          +'<div class="proto-sub-hdr" onclick="togSub('psm-'+pid+'')">'
+            +'Series por grupo muscular'
+            +'<div class="chv" id="chv-psm'+pid+'">&#8964;</div>'
+          +'</div>'
+          +'<div class="proto-sub-body" id="psm-'+pid+'">'+musHtml+'</div>'
         +'</div>'
-        +'<div class="proto-section">'
-          +'<div class="proto-sec-ttl">Dieta</div>'
-          +'<div>'+dietHtml+'</div>'
+
+        /* sub-section: Treino completo */
+        +'<div class="proto-sub">'
+          +'<div class="proto-sub-hdr" onclick="togSub('ptc-'+pid+'')">'
+            +'Treino completo'
+            +'<div class="chv" id="chv-ptc'+pid+'">&#8964;</div>'
+          +'</div>'
+          +'<div class="proto-sub-body" id="ptc-'+pid+'">'+treinoHtml+'</div>'
         +'</div>'
+
+        /* sub-section: Dieta */
+        +'<div class="proto-sub">'
+          +'<div class="proto-sub-hdr" onclick="togSub('pdi-'+pid+'')">'
+            +'Dieta'
+            +'<div class="chv" id="chv-pdi'+pid+'">&#8964;</div>'
+          +'</div>'
+          +'<div class="proto-sub-body" id="pdi-'+pid+'">'+dietHtml+'</div>'
+        +'</div>'
+
         +'<div class="proto-acts">'
-          +'<button class="proto-act-btn proto-btn-activate" onclick="activateProto('+proto.id+')">Reativar</button>'
-          +'<button class="proto-act-btn proto-btn-delete"   onclick="deleteProto('+proto.id+')">Excluir</button>'
+          +'<button class="proto-act-btn proto-btn-activate" onclick="activateProto('+pid+')">Reativar</button>'
+          +'<button class="proto-act-btn proto-btn-delete"   onclick="deleteProto('+pid+')">Excluir</button>'
         +'</div>'
       +'</div>';
+
     list.appendChild(card);
   });
 }
 
+/* toggle main proto body */
 function togProto(pid){
-  var el = document.getElementById('pb-'+pid);
-  if(el) el.classList.toggle('on');
+  var body = document.getElementById('pb-'+pid);
+  var chv  = document.getElementById('chv-p'+pid);
+  if(body){ body.classList.toggle('on'); }
+  if(chv)  { chv.classList.toggle('on'); }
+}
+
+/* toggle sub-section */
+function togSub(id){
+  var body = document.getElementById(id);
+  var chv  = document.getElementById('chv-'+id);
+  if(body){ body.classList.toggle('on'); }
+  if(chv)  { chv.classList.toggle('on'); }
+}
+
+/* build full workout HTML grouped by day */
+function buildFullWorkoutHtml(treino){
+  var keys = Object.keys(treino).sort();
+  if(!keys.length) return '<div class="empty" style="padding:8px 0">Sem treinos registrados</div>';
+  var html = '';
+  keys.forEach(function(k){
+    var day = treino[k];
+    if(!day.ex||!day.ex.length) return;
+    var d = new Date(k+'T12:00:00');
+    var dlbl = d.toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short',year:'2-digit'});
+    html += '<div class="proto-day-block">'
+      +'<div class="proto-day-lbl">'+dlbl+'</div>';
+    day.ex.forEach(function(ex){
+      var setRows = ex.sets.map(function(s,i){
+        var r=parseFloat(s.r)||0, w=parseFloat(s.w)||0, vol=r*w;
+        return '<tr>'
+          +'<td>'+(i+1)+'</td>'
+          +'<td>'+(s.n||'—')+'</td>'
+          +'<td>'+r+'</td>'
+          +'<td>'+w+'</td>'
+          +'<td class="vol">'+(vol>0?vol.toLocaleString('pt-BR'):'-')+'</td>'
+        +'</tr>';
+      }).join('');
+      html += '<div class="proto-ex-row">'
+        +'<div class="proto-ex-nm">'+esc(ex.name)+'</div>'
+        +'<div class="proto-ex-muscle">'+(ex.muscle||'—')+'</div>'
+        +'<table class="proto-sets-tbl">'
+          +'<thead><tr>'
+            +'<th>#</th><th>Obs</th><th>Reps</th><th>Peso</th><th>Volume</th>'
+          +'</tr></thead>'
+          +'<tbody>'+setRows+'</tbody>'
+        +'</table>'
+      +'</div>';
+    });
+    html += '</div>';
+  });
+  return html || '<div class="empty" style="padding:8px 0">Sem treinos registrados</div>';
 }
 
 /* pull protocols from cloud on boot */
