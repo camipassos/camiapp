@@ -631,6 +631,15 @@ select{appearance:none;-webkit-appearance:none}
   font-weight:700;font-size:20px;letter-spacing:1px;
   padding:2px 8px;width:100%;outline:none;
 }
+
+/* ── muscle history chart ── */
+.mush-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.mush-nm{font-size:10px;color:var(--mid);width:88px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mush-bars{flex:1;display:flex;gap:3px;align-items:flex-end;height:36px}
+.mush-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;height:100%;justify-content:flex-end}
+.mush-bar{width:100%;border-radius:2px 2px 0 0;background:rgba(79,156,249,.25);min-height:2px}
+.mush-bar.cur{background:var(--neon)}
+.mush-wk{font-size:7px;color:var(--dim)}
 </style>
 </head>
 <body>
@@ -708,9 +717,15 @@ select{appearance:none;-webkit-appearance:none}
 
     <div class="sec">Historico de peso</div>
     <div class="wt-card">
-      <div class="wt-ttl">Peso corporal — ultimos 14 dias</div>
+      <div class="wt-ttl">Peso corporal — por semana</div>
       <svg class="wt-svg" id="wtSvg" viewBox="0 0 300 70" preserveAspectRatio="none"></svg>
       <div class="wt-stats" id="wtStats"></div>
+    </div>
+
+    <div class="sec">Series por grupo muscular — historico</div>
+    <div class="chart-card" id="musHistCard">
+      <div class="chart-ttl">Series acumuladas por semana</div>
+      <div id="musHistChart"></div>
     </div>
   </div>
 </div><!-- /treino -->
@@ -827,10 +842,11 @@ function sbH(){
 var DB = (function(){
   try{
     var raw = JSON.parse(localStorage.getItem('camiDB2')||'null')||{t:{},d:{}};
-    if(!raw.proto) raw.proto = [];   /* protocols archive */
+    if(!raw.proto)      raw.proto = [];
+    if(!raw.protoStart) raw.protoStart = null; /* ISO date anchor for week numbering */
     return raw;
   }
-  catch(e){ return {t:{},d:{},proto:[]}; }
+  catch(e){ return {t:{},d:{},proto:[],protoStart:null}; }
 })();
 
 function saveDB(){
@@ -884,6 +900,11 @@ var dietOff    = 0;
 
 /* ─────────── BOOT ─────────── */
 window.addEventListener('DOMContentLoaded', function(){
+  if(!DB.protoStart){
+    /* first time: anchor to oldest treino key or today */
+    var tkeys = Object.keys(DB.t).sort();
+    DB.protoStart = tkeys.length ? tkeys[0] : today();
+  }
   curDay = today();
   curWk  = weekNum(curDay);
   setHeader();
@@ -916,11 +937,15 @@ function dateStr(off){
 /* week numbering: sequential from the Monday of the earliest recorded day.
    Week 1 = the week of the first ever entry (or this week if no data). */
 function firstMonday(){
-  var keys = Object.keys(DB.t).concat(Object.keys(DB.d||{})).sort();
-  var base  = keys.length ? keys[0] : today();
-  var d     = new Date(base+'T12:00:00');
-  var dow   = d.getDay() || 7;        /* 1=Mon */
-  d.setDate(d.getDate() - (dow - 1)); /* go to Monday */
+  /* use explicit protocol start anchor if set, else oldest key */
+  var anchor = DB.protoStart;
+  if(!anchor){
+    var keys = Object.keys(DB.t).concat(Object.keys(DB.d||{})).sort();
+    anchor = keys.length ? keys[0] : today();
+  }
+  var d   = new Date(anchor+'T12:00:00');
+  var dow = d.getDay() || 7;
+  d.setDate(d.getDate() - (dow - 1));
   d.setHours(12,0,0,0);
   return d;
 }
@@ -1240,7 +1265,7 @@ function addEx(){
 
 /* ─────────── EVOLUCAO ─────────── */
 function chgWk(d){ curWk=Math.max(1,curWk+d); document.getElementById('wnLbl').textContent='Semana '+curWk; renderEvol(); }
-function renderEvol(){ renderMusGrid(); renderVolChart(); renderComp(); renderWtChart(); }
+function renderEvol(){ renderMusGrid(); renderVolChart(); renderComp(); renderWtChart(); renderMusHist(); }
 
 function renderMusGrid(){
   var c=musSets(curWk), g=document.getElementById('musGrid'), ks=Object.keys(c);
@@ -1289,6 +1314,57 @@ function renderComp(){
         +'<div class="comp-bw"><div class="comp-track"><div class="comp-fill curr" style="width:'+Math.round(c/mx*100)+'%"></div></div><div class="comp-lbl">'+fmtVol(c)+'</div></div>'
       +'</div></div>';
   }).join('');
+}
+
+function renderMusHist(){
+  var el = document.getElementById('musHistChart');
+  if(!el) return;
+
+  /* collect all weeks that have data */
+  var allWks = [];
+  var seen = {};
+  Object.keys(DB.t).forEach(function(k){
+    var w = weekNum(k);
+    if(!seen[w]){ seen[w]=1; allWks.push(w); }
+  });
+  allWks.sort(function(a,b){ return a-b; });
+  var show = allWks.slice(-8); /* last 8 weeks */
+
+  if(!show.length){
+    el.innerHTML='<div class="empty">Sem dados ainda</div>';
+    return;
+  }
+
+  /* gather all muscles present */
+  var allMus = {};
+  show.forEach(function(w){
+    var c = musSets(w);
+    Object.keys(c).forEach(function(m){ allMus[m]=1; });
+  });
+  var muscles = Object.keys(allMus).sort();
+  if(!muscles.length){ el.innerHTML='<div class="empty">Sem dados</div>'; return; }
+
+  /* for each muscle, render a mini bar row across weeks */
+  var html = '';
+  muscles.forEach(function(m){
+    var vals = show.map(function(w){
+      var c = musSets(w);
+      return c[m] ? (c[m].sets||0) : 0;
+    });
+    var mx = Math.max.apply(null, vals.concat([1]));
+    var bars = show.map(function(w,i){
+      var h = Math.max(2, Math.round(vals[i]/mx*32));
+      return '<div class="mush-col">'
+        +'<div class="mush-bar'+(w===curWk?' cur':'')+'" style="height:'+h+'px"></div>'
+        +'<div class="mush-wk">S'+w+'</div>'
+      +'</div>';
+    }).join('');
+    html += '<div class="mush-row">'
+      +'<div class="mush-nm">'+m+'</div>'
+      +'<div class="mush-bars">'+bars+'</div>'
+    +'</div>';
+  });
+  el.innerHTML = html;
 }
 
 function renderWtChart(){
@@ -1583,8 +1659,9 @@ function confirmFinalize(){
 
   DB.proto.push(proto);
   /* keep DB.t intact so calendar stays populated.
-     Only reset diet and navigation state. */
+     Reset diet, set new protocol start anchor, reset navigation. */
   DB.d = {};
+  DB.protoStart = today();   /* week 1 restarts from today */
   scrollerWk = 0;
   curWk = 1;
 
