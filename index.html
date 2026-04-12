@@ -618,6 +618,19 @@ select{appearance:none;-webkit-appearance:none}
   border-top:1px solid var(--dim);
 }
 .proto-sets-tbl td.vol{color:var(--neon);font-weight:600}
+
+.proto-edit-btn{
+  background:none;border:none;color:var(--mid);font-size:14px;
+  padding:4px 6px;border-radius:var(--rxs);cursor:pointer;
+  transition:color .15s;flex-shrink:0;
+}
+.proto-edit-btn:hover,.proto-edit-btn:active{color:var(--neon)}
+.proto-name-in{
+  background:var(--s3);border:1px solid var(--nln);border-radius:var(--rxs);
+  color:var(--white);font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;font-size:20px;letter-spacing:1px;
+  padding:2px 8px;width:100%;outline:none;
+}
 </style>
 </head>
 <body>
@@ -1653,12 +1666,15 @@ function renderProtos(){
     card.className = 'proto-card';
     card.innerHTML =
       /* header — click to expand/collapse the whole card body */
-      '<div class="proto-hdr" onclick="togProto('+pid+')">'
+      '<div class="proto-hdr" data-action="togProto" data-pid="'+pid+'">'
         +'<div class="proto-info">'
-          +'<div class="proto-name">'+proto.name+'</div>'
+          +'<div class="proto-name" id="pname-'+pid+'" onclick="event.stopPropagation()">'+proto.name+'</div>'
           +'<div class="proto-dates">'+dateRange+' &middot; '+(proto.weeks||'?')+' sem.</div>'
         +'</div>'
-        +'<div class="chv" id="chv-p'+pid+'">&#8964;</div>'
+        +'<div style="display:flex;gap:6px;align-items:center">'
+          +'<button class="proto-edit-btn" data-action="editProto" data-pid="'+pid+'" title="Renomear">&#9998;</button>'
+          +'<div class="chv" id="chv-p'+pid+'">&#8964;</div>'
+        +'</div>'
       +'</div>'
 
       /* body — hidden by default, opens on click */
@@ -1666,34 +1682,34 @@ function renderProtos(){
 
         /* sub-section: Series por grupo muscular */
         +'<div class="proto-sub">'
-          +'<div class="proto-sub-hdr" onclick="togSub(&quot;psm-&quot;+pid)">'
+          +'<div class="proto-sub-hdr" data-action="togSub" data-target="psm-'+pid+'">'
             +'Series por grupo muscular'
-            +'<div class="chv" id="chv-psm'+pid+'">&#8964;</div>'
+            +'<div class="chv" id="chv-psm-'+pid+'">&#8964;</div>'
           +'</div>'
           +'<div class="proto-sub-body" id="psm-'+pid+'">'+musHtml+'</div>'
         +'</div>'
 
         /* sub-section: Treino completo */
         +'<div class="proto-sub">'
-          +'<div class="proto-sub-hdr" onclick="togSub(&quot;ptc-&quot;+pid)">'
+          +'<div class="proto-sub-hdr" data-action="togSub" data-target="ptc-'+pid+'">'
             +'Treino completo'
-            +'<div class="chv" id="chv-ptc'+pid+'">&#8964;</div>'
+            +'<div class="chv" id="chv-ptc-'+pid+'">&#8964;</div>'
           +'</div>'
           +'<div class="proto-sub-body" id="ptc-'+pid+'">'+treinoHtml+'</div>'
         +'</div>'
 
         /* sub-section: Dieta */
         +'<div class="proto-sub">'
-          +'<div class="proto-sub-hdr" onclick="togSub(&quot;pdi-&quot;+pid)">'
+          +'<div class="proto-sub-hdr" data-action="togSub" data-target="pdi-'+pid+'">'
             +'Dieta'
-            +'<div class="chv" id="chv-pdi'+pid+'">&#8964;</div>'
+            +'<div class="chv" id="chv-pdi-'+pid+'">&#8964;</div>'
           +'</div>'
           +'<div class="proto-sub-body" id="pdi-'+pid+'">'+dietHtml+'</div>'
         +'</div>'
 
         +'<div class="proto-acts">'
-          +'<button class="proto-act-btn proto-btn-activate" onclick="activateProto('+pid+')">Reativar</button>'
-          +'<button class="proto-act-btn proto-btn-delete"   onclick="deleteProto('+pid+')">Excluir</button>'
+          +'<button class="proto-act-btn proto-btn-activate" data-action="activateProto" data-pid="'+pid+'">Reativar</button>'
+          +'<button class="proto-act-btn proto-btn-delete"   data-action="deleteProto"   data-pid="'+pid+'">Excluir</button>'
         +'</div>'
       +'</div>';
 
@@ -1701,20 +1717,59 @@ function renderProtos(){
   });
 }
 
-/* toggle main proto body */
+/* ── event delegation for proto list ── */
+document.addEventListener('click', function(e){
+  var el = e.target.closest('[data-action]');
+  if(!el) return;
+  var action = el.dataset.action;
+  var pid    = el.dataset.pid ? Number(el.dataset.pid) : null;
+  var target = el.dataset.target || null;
+  if(action==='togProto'    && pid)    togProto(pid);
+  if(action==='togSub'      && target) togSub(target);
+  if(action==='activateProto'&& pid)   activateProto(pid);
+  if(action==='deleteProto' && pid)    deleteProto(pid);
+  if(action==='editProto'   && pid)  { e.stopPropagation(); editProto(pid); }
+});
+
 function togProto(pid){
   var body = document.getElementById('pb-'+pid);
   var chv  = document.getElementById('chv-p'+pid);
-  if(body){ body.classList.toggle('on'); }
-  if(chv)  { chv.classList.toggle('on'); }
+  if(body) body.classList.toggle('on');
+  if(chv)  chv.classList.toggle('on');
 }
-
-/* toggle sub-section */
 function togSub(id){
   var body = document.getElementById(id);
   var chv  = document.getElementById('chv-'+id);
-  if(body){ body.classList.toggle('on'); }
-  if(chv)  { chv.classList.toggle('on'); }
+  if(body) body.classList.toggle('on');
+  if(chv)  chv.classList.toggle('on');
+}
+
+/* ── edit protocol name ── */
+function editProto(pid){
+  var proto = (DB.proto||[]).find(function(p){ return p.id===pid; });
+  if(!proto) return;
+  var nameEl = document.getElementById('pname-'+pid);
+  if(!nameEl) return;
+  /* replace with input */
+  var prev = proto.name;
+  nameEl.innerHTML = '<input id="pedit-'+pid+'" class="proto-name-in" value="'+esc(prev)+'" onclick="event.stopPropagation()">';
+  var inp = document.getElementById('pedit-'+pid);
+  if(inp){ inp.focus(); inp.select(); }
+  inp.addEventListener('blur', function(){ saveProtoName(pid, inp.value.trim()||prev); });
+  inp.addEventListener('keydown', function(e){
+    if(e.key==='Enter')  saveProtoName(pid, inp.value.trim()||prev);
+    if(e.key==='Escape') saveProtoName(pid, prev);
+  });
+}
+function saveProtoName(pid, newName){
+  var proto = (DB.proto||[]).find(function(p){ return p.id===pid; });
+  if(!proto) return;
+  proto.name = newName;
+  var nameEl = document.getElementById('pname-'+pid);
+  if(nameEl) nameEl.textContent = newName;
+  saveDB();
+  pushProto(proto);
+  showToast('Nome atualizado');
 }
 
 /* build full workout HTML grouped by day */
