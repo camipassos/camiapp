@@ -1523,19 +1523,31 @@ function confirmFinalize(){
   var startDate = allKeys.length ? allKeys[0] : today();
   var endDate   = allKeys.length ? allKeys[allKeys.length-1] : today();
 
-  /* compute muscle volume summary across all weeks */
-  var musVol = {};
+  /* compute muscle summary — average per week so numbers make sense.
+     Each set's muscle comes from s.m (set-level) with fallback to ex.muscle. */
+  var musRaw = {};   /* { muscle: { sets, reps, vol } } total across all days */
   tKeys.forEach(function(k){
     DB.t[k].ex.forEach(function(e){
-      if(!e.muscle) return;
-      if(!musVol[e.muscle]) musVol[e.muscle]={sets:0,reps:0,vol:0};
       e.sets.forEach(function(s){
+        var mus = s.m || e.muscle || '';
+        if(!mus) return;
+        if(!musRaw[mus]) musRaw[mus]={sets:0,reps:0,vol:0};
         var r=parseFloat(s.r)||0, w=parseFloat(s.w)||0;
-        musVol[e.muscle].sets++;
-        musVol[e.muscle].reps+=r;
-        musVol[e.muscle].vol+=r*w;
+        musRaw[mus].sets++;
+        musRaw[mus].reps+=r;
+        musRaw[mus].vol+=r*w;
       });
     });
+  });
+  /* divide by number of weeks to get weekly average */
+  var totalWks = Math.max(1, weekNum(endDate) - weekNum(startDate) + 1);
+  var musVol = {};
+  Object.keys(musRaw).forEach(function(m){
+    musVol[m] = {
+      sets: Math.round(musRaw[m].sets / totalWks),
+      reps: Math.round(musRaw[m].reps / totalWks),
+      vol:  Math.round(musRaw[m].vol  / totalWks)
+    };
   });
 
   /* diet summary: weight at end + last week avg */
@@ -1570,8 +1582,8 @@ function confirmFinalize(){
   };
 
   DB.proto.push(proto);
-  /* clear current treino and dieta */
-  DB.t = {};
+  /* keep DB.t intact so calendar stays populated.
+     Only reset diet and navigation state. */
   DB.d = {};
   scrollerWk = 0;
   curWk = 1;
