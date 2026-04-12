@@ -512,6 +512,125 @@ select{appearance:none;-webkit-appearance:none}
 .comp-fill.prev{background:rgba(255,170,51,.50)}
 .comp-fill.curr{background:var(--neon);box-shadow:none}
 .comp-legend-prev{color:rgba(255,170,51,.9)}
+
+/* ═══════════════════ HISTORICO ═══════════════════ */
+.proto-card{
+  background:var(--s1);border:1px solid var(--bdr);border-radius:var(--r);
+  margin-bottom:12px;overflow:hidden;
+}
+.proto-hdr{
+  padding:14px 16px;display:flex;align-items:center;
+  justify-content:space-between;cursor:pointer;gap:10px;
+}
+.proto-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.proto-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;letter-spacing:1px;color:var(--white)}
+.proto-dates{font-size:10px;color:var(--mid)}
+.proto-badge{
+  background:var(--ndim);color:var(--neon);border:1px solid var(--nln);
+  border-radius:20px;font-size:9px;font-weight:600;padding:3px 10px;
+  letter-spacing:1px;text-transform:uppercase;white-space:nowrap;flex-shrink:0;
+}
+.proto-badge.active{background:rgba(79,156,249,.18);border-color:var(--neon)}
+.proto-body{display:none;padding:0 16px 16px;border-top:1px solid var(--bdr)}
+.proto-body.on{display:block}
+.proto-section{margin-top:14px}
+.proto-sec-ttl{
+  font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;
+  color:var(--mid);margin-bottom:8px;display:flex;align-items:center;gap:8px;
+}
+.proto-sec-ttl::after{content:'';flex:1;height:1px;background:var(--bdr)}
+.proto-mus-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:4px}
+.proto-mus-card{background:var(--s3);border-radius:var(--rsm);padding:8px;text-align:center}
+.proto-mus-nm{font-size:9px;color:var(--mid);text-transform:uppercase;letter-spacing:.5px}
+.proto-mus-v{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--neon)}
+.proto-mus-sb{font-size:8px;color:var(--dim)}
+.proto-diet-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:7px 0;border-bottom:1px solid var(--bdr);
+}
+.proto-diet-row:last-child{border-bottom:none}
+.proto-diet-k{font-size:11px;color:var(--mid)}
+.proto-diet-v{font-weight:600;font-size:13px;color:var(--white)}
+.proto-diet-v.hi{color:var(--neon)}
+.proto-acts{display:flex;gap:8px;margin-top:14px}
+.proto-act-btn{
+  flex:1;padding:10px;border-radius:var(--rsm);font-size:11px;font-weight:600;
+  letter-spacing:.5px;text-transform:uppercase;cursor:pointer;border:none;
+  font-family:'Sora',sans-serif;transition:opacity .15s;
+}
+.proto-act-btn:active{opacity:.8}
+.proto-btn-activate{background:var(--neon);color:#121212}
+.proto-btn-delete{background:var(--rdim);color:var(--red);border:1px solid rgba(224,92,92,.2)}
+
+.btn-finalize{
+  width:100%;padding:14px;margin-top:20px;
+  background:var(--ndim);color:var(--neon);
+  border:1px dashed var(--nln);border-radius:var(--r);
+  font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;
+  cursor:pointer;transition:background .2s;font-family:'Sora',sans-serif;
+}
+.btn-finalize:active{background:var(--nfnt)}
+
+/* finalize modal overlay reuses .overlay but with own content */
+.fin-modal{
+  background:var(--s1);border-radius:20px 20px 0 0;
+  border-top:1px solid var(--bdrg);
+  padding:24px 20px max(env(safe-area-inset-bottom),32px);
+  width:100%;max-width:480px;
+  animation:up .26s cubic-bezier(.34,1.4,.64,1);
+}
+.fin-ttl{
+  font-family:'Barlow Condensed',sans-serif;font-weight:700;
+  font-size:24px;letter-spacing:2px;margin-bottom:6px;color:var(--neon);
+}
+.fin-sub{font-size:11px;color:var(--mid);margin-bottom:16px}
+
+/* ── proto collapsible sub-sections ── */
+.proto-sub{border:1px solid var(--bdr);border-radius:var(--rsm);margin-bottom:8px;overflow:hidden}
+.proto-sub-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 14px;cursor:pointer;background:var(--s2);
+  font-size:12px;font-weight:600;color:var(--white);letter-spacing:.3px;
+}
+.proto-sub-hdr .chv{width:22px;height:22px;font-size:9px}
+.proto-sub-body{display:none;padding:12px 14px;background:var(--s1)}
+.proto-sub-body.on{display:block}
+
+/* full workout list inside proto */
+.proto-day-block{margin-bottom:14px}
+.proto-day-lbl{
+  font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;
+  color:var(--mid);margin-bottom:6px;display:flex;align-items:center;gap:8px;
+}
+.proto-day-lbl::after{content:'';flex:1;height:1px;background:var(--bdr)}
+.proto-ex-row{
+  background:var(--s3);border-radius:var(--rsm);padding:10px 12px;margin-bottom:6px;
+}
+.proto-ex-nm{font-weight:600;font-size:13px;margin-bottom:4px}
+.proto-ex-muscle{font-size:10px;color:var(--mid);margin-bottom:6px}
+.proto-sets-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.proto-sets-tbl th{
+  color:var(--dim);font-weight:600;font-size:8px;letter-spacing:1px;
+  text-transform:uppercase;padding:0 4px 4px;text-align:center;
+}
+.proto-sets-tbl td{
+  color:var(--white);padding:3px 4px;text-align:center;
+  border-top:1px solid var(--dim);
+}
+.proto-sets-tbl td.vol{color:var(--neon);font-weight:600}
+
+.proto-edit-btn{
+  background:none;border:none;color:var(--mid);font-size:14px;
+  padding:4px 6px;border-radius:var(--rxs);cursor:pointer;
+  transition:color .15s;flex-shrink:0;
+}
+.proto-edit-btn:hover,.proto-edit-btn:active{color:var(--neon)}
+.proto-name-in{
+  background:var(--s3);border:1px solid var(--nln);border-radius:var(--rxs);
+  color:var(--white);font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;font-size:20px;letter-spacing:1px;
+  padding:2px 8px;width:100%;outline:none;
+}
 </style>
 </head>
 <body>
@@ -532,8 +651,9 @@ select{appearance:none;-webkit-appearance:none}
 
 <!-- MAIN TABS -->
 <div class="main-tabs">
-  <div class="mtab on" id="mt-treino" onclick="gotoMain('treino')">Treino</div>
-  <div class="mtab"    id="mt-dieta"  onclick="gotoMain('dieta')">Dieta</div>
+  <div class="mtab"    id="mt-historico" onclick="gotoMain('historico')">Anterior</div>
+  <div class="mtab on" id="mt-treino"    onclick="gotoMain('treino')">Treino</div>
+  <div class="mtab"    id="mt-dieta"     onclick="gotoMain('dieta')">Dieta</div>
 </div>
 
 <!-- ══ TREINO VIEW ══ -->
@@ -554,6 +674,7 @@ select{appearance:none;-webkit-appearance:none}
       <div class="sec">Exercicios</div>
       <div id="exList"></div>
       <button class="btn-add-ex" onclick="openModal()">+ Adicionar exercicio</button>
+      <button class="btn-finalize" onclick="openFinalizeModal()">&#10003; Finalizar protocolo atual</button>
     </div>
   </div>
 
@@ -634,6 +755,15 @@ select{appearance:none;-webkit-appearance:none}
   </div>
 </div><!-- /dieta -->
 
+<!-- ══ HISTORICO VIEW ══ -->
+<div class="view" id="view-historico">
+  <div class="sbody">
+    <div class="sec">Protocolos finalizados</div>
+    <div id="protoList"></div>
+    <div class="empty" id="protoEmpty" style="display:none">Nenhum protocolo finalizado ainda.<br>Finalize seu primeiro protocolo na aba Treino.</div>
+  </div>
+</div>
+
 <!-- FAB -->
 <div class="fab-wrap">
   <button class="fab" id="fabBtn" onclick="fabSave()">Salvar treino</button>
@@ -661,6 +791,19 @@ select{appearance:none;-webkit-appearance:none}
   </div>
 </div>
 
+<!-- FINALIZE MODAL -->
+<div class="overlay" id="fin-overlay" onclick="finOverlayBg(event)">
+  <div class="fin-modal">
+    <div class="fin-ttl">Finalizar protocolo</div>
+    <div class="fin-sub">Isso arquiva o treino e dieta atuais. Voce podera consultar e reativar depois.</div>
+    <input class="m-in" id="finName" placeholder="Nome do protocolo (ex: Hipertrofia Jan-Mar)">
+    <div class="m-btns" style="margin-top:6px">
+      <button class="m-btn m-cancel" onclick="closeFinalizeModal()">Cancelar</button>
+      <button class="m-btn m-ok"     onclick="confirmFinalize()">Finalizar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -682,8 +825,12 @@ function sbH(){
 
 /* ─────────── DB (local cache + cloud) ─────────── */
 var DB = (function(){
-  try{ return JSON.parse(localStorage.getItem('camiDB2')||'null')||{t:{},d:{}}; }
-  catch(e){ return {t:{},d:{}}; }
+  try{
+    var raw = JSON.parse(localStorage.getItem('camiDB2')||'null')||{t:{},d:{}};
+    if(!raw.proto) raw.proto = [];   /* protocols archive */
+    return raw;
+  }
+  catch(e){ return {t:{},d:{},proto:[]}; }
 })();
 
 function saveDB(){
@@ -745,11 +892,13 @@ window.addEventListener('DOMContentLoaded', function(){
   renderDieta();
   /* pull cloud data then refresh UI */
   pullFromCloud(function(){
-    curWk = weekNum(curDay);
-    setHeader();
-    buildScroller();
-    renderEx();
-    renderDieta();
+    pullProtos(function(){
+      curWk = weekNum(curDay);
+      setHeader();
+      buildScroller();
+      renderEx();
+      renderDieta();
+    });
   });
 });
 
@@ -867,13 +1016,14 @@ function wkToMonday(targetWk){
 /* ─────────── MAIN TAB SWITCH ─────────── */
 function gotoMain(t){
   curTab = t;
-  document.getElementById('mt-treino').classList.toggle('on', t==='treino');
-  document.getElementById('mt-dieta').classList.toggle('on',  t==='dieta');
-  document.getElementById('view-treino').classList.toggle('on', t==='treino');
-  document.getElementById('view-dieta').classList.toggle('on',  t==='dieta');
-  document.getElementById('fabBtn').textContent = t==='treino' ? 'Salvar treino' : 'Salvar dieta';
-  if(t==='treino'){ buildScroller(); renderEx(); }
-  if(t==='dieta')  renderDieta();
+  ['treino','dieta','historico'].forEach(function(x){
+    document.getElementById('mt-'+x).classList.toggle('on', x===t);
+    document.getElementById('view-'+x).classList.toggle('on', x===t);
+  });
+  var fabBtn = document.getElementById('fabBtn');
+  if(t==='treino')    { fabBtn.textContent='Salvar treino'; fabBtn.style.display=''; buildScroller(); renderEx(); }
+  else if(t==='dieta'){ fabBtn.textContent='Salvar dieta';  fabBtn.style.display=''; renderDieta(); }
+  else                { fabBtn.style.display='none'; renderProtos(); }
 }
 
 /* ─────────── SUB TAB SWITCH ─────────── */
@@ -1349,6 +1499,346 @@ function onTouchEnd(e){
   document.removeEventListener('touchmove',onTouchMove);
   document.removeEventListener('touchend', onTouchEnd);
   renderEx();
+}
+
+
+/* ─────────── PROTOCOLS (Treinos Anteriores) ─────────── */
+function openFinalizeModal(){
+  document.getElementById('fin-overlay').classList.add('on');
+  setTimeout(function(){ document.getElementById('finName').focus(); },120);
+}
+function closeFinalizeModal(){ document.getElementById('fin-overlay').classList.remove('on'); }
+function finOverlayBg(e){ if(e.target.id==='fin-overlay') closeFinalizeModal(); }
+
+function confirmFinalize(){
+  var name = document.getElementById('finName').value.trim();
+  if(!name){ showToast('Dê um nome ao protocolo'); return; }
+
+  if(!DB.proto) DB.proto = [];
+
+  /* collect all weeks in current data */
+  var tKeys = Object.keys(DB.t).sort();
+  var dKeys = Object.keys(DB.d||{}).sort();
+  var allKeys = tKeys.concat(dKeys).sort();
+  var startDate = allKeys.length ? allKeys[0] : today();
+  var endDate   = allKeys.length ? allKeys[allKeys.length-1] : today();
+
+  /* compute muscle summary — average per week so numbers make sense.
+     Each set's muscle comes from s.m (set-level) with fallback to ex.muscle. */
+  var musRaw = {};   /* { muscle: { sets, reps, vol } } total across all days */
+  tKeys.forEach(function(k){
+    DB.t[k].ex.forEach(function(e){
+      e.sets.forEach(function(s){
+        var mus = s.m || e.muscle || '';
+        if(!mus) return;
+        if(!musRaw[mus]) musRaw[mus]={sets:0,reps:0,vol:0};
+        var r=parseFloat(s.r)||0, w=parseFloat(s.w)||0;
+        musRaw[mus].sets++;
+        musRaw[mus].reps+=r;
+        musRaw[mus].vol+=r*w;
+      });
+    });
+  });
+  /* divide by number of weeks to get weekly average */
+  var totalWks = Math.max(1, weekNum(endDate) - weekNum(startDate) + 1);
+  var musVol = {};
+  Object.keys(musRaw).forEach(function(m){
+    musVol[m] = {
+      sets: Math.round(musRaw[m].sets / totalWks),
+      reps: Math.round(musRaw[m].reps / totalWks),
+      vol:  Math.round(musRaw[m].vol  / totalWks)
+    };
+  });
+
+  /* diet summary: weight at end + last week avg */
+  var lastWkNum = 0;
+  dKeys.forEach(function(k){ var w=weekNum(k); if(w>lastWkNum) lastWkNum=w; });
+  var lastWkKeys = lastWkNum ? daysOfWeek(lastWkNum) : [];
+  var lastEnts = lastWkKeys.map(function(k){ return DB.d&&DB.d[k]; }).filter(Boolean);
+  var dietAvg = {c:0,p:0,f:0,kcal:0,wt:null};
+  if(lastEnts.length){
+    var avg=function(f){ return Math.round(lastEnts.reduce(function(s,e){ return s+(parseFloat(e[f])||0); },0)/lastEnts.length); };
+    dietAvg.c = avg('c'); dietAvg.p = avg('p'); dietAvg.f = avg('f');
+    dietAvg.kcal = Math.round(dietAvg.c*4+dietAvg.p*4+dietAvg.f*9);
+    var wts=lastEnts.filter(function(e){ return e.wt; }).map(function(e){ return parseFloat(e.wt); });
+    if(wts.length) dietAvg.wt = parseFloat((wts.reduce(function(a,b){return a+b;},0)/wts.length).toFixed(1));
+  }
+  /* final weight = last recorded weight entry */
+  var finalWt = null;
+  dKeys.slice().reverse().forEach(function(k){
+    if(!finalWt && DB.d[k] && DB.d[k].wt) finalWt = parseFloat(DB.d[k].wt);
+  });
+
+  var proto = {
+    id:        Date.now(),
+    name:      name,
+    startDate: startDate,
+    endDate:   endDate,
+    treino:    JSON.parse(JSON.stringify(DB.t)),
+    musVol:    musVol,
+    dietAvg:   dietAvg,
+    finalWt:   finalWt,
+    weeks:     Math.max(1, weekNum(endDate) - weekNum(startDate) + 1)
+  };
+
+  DB.proto.push(proto);
+  /* keep DB.t intact so calendar stays populated.
+     Only reset diet and navigation state. */
+  DB.d = {};
+  scrollerWk = 0;
+  curWk = 1;
+
+  saveDB();
+  pushProto(proto);
+  closeFinalizeModal();
+  document.getElementById('finName').value = '';
+  gotoMain('historico');
+  showToast('Protocolo "'+name+'" arquivado!');
+}
+
+function pushProto(proto){
+  /* store each protocol as a single row keyed by its id */
+  fetch(SB_URL+'/rest/v1/protocolos?on_conflict=user_id,proto_id',{
+    method:'POST', headers:sbH(),
+    body:JSON.stringify({user_id:USER_ID, proto_id:String(proto.id), data:proto, updated_at:new Date().toISOString()})
+  }).catch(function(){});
+}
+
+function activateProto(pid){
+  if(!window.confirm('Reativar este protocolo?\nO treino e dieta atuais serao substituidos.')) return;
+  var idx = DB.proto.findIndex(function(p){ return p.id===pid; });
+  if(idx<0) return;
+  var proto = DB.proto[idx];
+  DB.t = JSON.parse(JSON.stringify(proto.treino));
+  DB.d = {};
+  scrollerWk = 0;
+  curWk = weekNum(today());
+  saveDB();
+  /* push all treino days back */
+  Object.keys(DB.t).forEach(function(k){ pushTreino(k); });
+  gotoMain('treino');
+  showToast('Protocolo "'+proto.name+'" reativado!');
+}
+
+function deleteProto(pid){
+  if(!window.confirm('Excluir este protocolo permanentemente?')) return;
+  DB.proto = DB.proto.filter(function(p){ return p.id!==pid; });
+  saveDB();
+  renderProtos();
+  showToast('Protocolo excluido');
+}
+
+function renderProtos(){
+  var list  = document.getElementById('protoList');
+  var empty = document.getElementById('protoEmpty');
+  if(!DB.proto||!DB.proto.length){
+    list.innerHTML=''; empty.style.display='block';
+    return;
+  }
+  empty.style.display='none';
+  var protos = DB.proto.slice().reverse();
+  list.innerHTML='';
+  protos.forEach(function(proto){
+    var d0 = new Date(proto.startDate+'T12:00:00');
+    var d1 = new Date(proto.endDate+'T12:00:00');
+    var fmtD = function(d){ return d.toLocaleDateString('pt-BR',{day:'numeric',month:'short',year:'2-digit'}); };
+    var dateRange = fmtD(d0)+' – '+fmtD(d1);
+    var pid = proto.id;
+
+    /* ── 1. Series por grupo muscular (not volume) ── */
+    var musKeys = Object.keys(proto.musVol||{});
+    var musHtml = musKeys.length
+      ? '<div class="proto-mus-grid">'
+          + musKeys.sort(function(a,b){ return (proto.musVol[b].sets||0)-(proto.musVol[a].sets||0); })
+              .map(function(m){
+                var v = proto.musVol[m];
+                return '<div class="proto-mus-card">'
+                  +'<div class="proto-mus-nm">'+m+'</div>'
+                  +'<div class="proto-mus-v">'+(v.sets||0)+'</div>'
+                  +'<div class="proto-mus-sb">series</div>'
+                  +'</div>';
+              }).join('')
+          +'</div>'
+      : '<div class="empty" style="padding:8px 0">Sem dados</div>';
+
+    /* ── 2. Dieta ── */
+    var da = proto.dietAvg||{};
+    var fwStr = proto.finalWt ? proto.finalWt+' kg' : '—';
+    var dietHtml =
+      '<div class="proto-diet-row"><span class="proto-diet-k">Peso final</span><span class="proto-diet-v">'+fwStr+'</span></div>'
+      +'<div class="proto-diet-row"><span class="proto-diet-k">Kcal medias</span><span class="proto-diet-v hi">'+(da.kcal||0).toLocaleString('pt-BR')+'</span></div>'
+      +'<div class="proto-diet-row"><span class="proto-diet-k">Carb</span><span class="proto-diet-v">'+(da.c||0)+'g</span></div>'
+      +'<div class="proto-diet-row"><span class="proto-diet-k">Prot</span><span class="proto-diet-v">'+(da.p||0)+'g</span></div>'
+      +'<div class="proto-diet-row"><span class="proto-diet-k">Gord</span><span class="proto-diet-v">'+(da.f||0)+'g</span></div>';
+
+    /* ── 3. Treino completo ── */
+    var treinoHtml = buildFullWorkoutHtml(proto.treino||{});
+
+    var card = document.createElement('div');
+    card.className = 'proto-card';
+    card.innerHTML =
+      /* header — click to expand/collapse the whole card body */
+      '<div class="proto-hdr" data-action="togProto" data-pid="'+pid+'">'
+        +'<div class="proto-info">'
+          +'<div class="proto-name" id="pname-'+pid+'" onclick="event.stopPropagation()">'+proto.name+'</div>'
+          +'<div class="proto-dates">'+dateRange+' &middot; '+(proto.weeks||'?')+' sem.</div>'
+        +'</div>'
+        +'<div style="display:flex;gap:6px;align-items:center">'
+          +'<button class="proto-edit-btn" data-action="editProto" data-pid="'+pid+'" title="Renomear">&#9998;</button>'
+          +'<div class="chv" id="chv-p'+pid+'">&#8964;</div>'
+        +'</div>'
+      +'</div>'
+
+      /* body — hidden by default, opens on click */
+      +'<div class="proto-body" id="pb-'+pid+'">'
+
+        /* sub-section: Series por grupo muscular */
+        +'<div class="proto-sub">'
+          +'<div class="proto-sub-hdr" data-action="togSub" data-target="psm-'+pid+'">'
+            +'Series por grupo muscular'
+            +'<div class="chv" id="chv-psm-'+pid+'">&#8964;</div>'
+          +'</div>'
+          +'<div class="proto-sub-body" id="psm-'+pid+'">'+musHtml+'</div>'
+        +'</div>'
+
+        /* sub-section: Treino completo */
+        +'<div class="proto-sub">'
+          +'<div class="proto-sub-hdr" data-action="togSub" data-target="ptc-'+pid+'">'
+            +'Treino completo'
+            +'<div class="chv" id="chv-ptc-'+pid+'">&#8964;</div>'
+          +'</div>'
+          +'<div class="proto-sub-body" id="ptc-'+pid+'">'+treinoHtml+'</div>'
+        +'</div>'
+
+        /* sub-section: Dieta */
+        +'<div class="proto-sub">'
+          +'<div class="proto-sub-hdr" data-action="togSub" data-target="pdi-'+pid+'">'
+            +'Dieta'
+            +'<div class="chv" id="chv-pdi-'+pid+'">&#8964;</div>'
+          +'</div>'
+          +'<div class="proto-sub-body" id="pdi-'+pid+'">'+dietHtml+'</div>'
+        +'</div>'
+
+        +'<div class="proto-acts">'
+          +'<button class="proto-act-btn proto-btn-activate" data-action="activateProto" data-pid="'+pid+'">Reativar</button>'
+          +'<button class="proto-act-btn proto-btn-delete"   data-action="deleteProto"   data-pid="'+pid+'">Excluir</button>'
+        +'</div>'
+      +'</div>';
+
+    list.appendChild(card);
+  });
+}
+
+/* ── event delegation for proto list ── */
+document.addEventListener('click', function(e){
+  var el = e.target.closest('[data-action]');
+  if(!el) return;
+  var action = el.dataset.action;
+  var pid    = el.dataset.pid ? Number(el.dataset.pid) : null;
+  var target = el.dataset.target || null;
+  if(action==='togProto'    && pid)    togProto(pid);
+  if(action==='togSub'      && target) togSub(target);
+  if(action==='activateProto'&& pid)   activateProto(pid);
+  if(action==='deleteProto' && pid)    deleteProto(pid);
+  if(action==='editProto'   && pid)  { e.stopPropagation(); editProto(pid); }
+});
+
+function togProto(pid){
+  var body = document.getElementById('pb-'+pid);
+  var chv  = document.getElementById('chv-p'+pid);
+  if(body) body.classList.toggle('on');
+  if(chv)  chv.classList.toggle('on');
+}
+function togSub(id){
+  var body = document.getElementById(id);
+  var chv  = document.getElementById('chv-'+id);
+  if(body) body.classList.toggle('on');
+  if(chv)  chv.classList.toggle('on');
+}
+
+/* ── edit protocol name ── */
+function editProto(pid){
+  var proto = (DB.proto||[]).find(function(p){ return p.id===pid; });
+  if(!proto) return;
+  var nameEl = document.getElementById('pname-'+pid);
+  if(!nameEl) return;
+  /* replace with input */
+  var prev = proto.name;
+  nameEl.innerHTML = '<input id="pedit-'+pid+'" class="proto-name-in" value="'+esc(prev)+'" onclick="event.stopPropagation()">';
+  var inp = document.getElementById('pedit-'+pid);
+  if(inp){ inp.focus(); inp.select(); }
+  inp.addEventListener('blur', function(){ saveProtoName(pid, inp.value.trim()||prev); });
+  inp.addEventListener('keydown', function(e){
+    if(e.key==='Enter')  saveProtoName(pid, inp.value.trim()||prev);
+    if(e.key==='Escape') saveProtoName(pid, prev);
+  });
+}
+function saveProtoName(pid, newName){
+  var proto = (DB.proto||[]).find(function(p){ return p.id===pid; });
+  if(!proto) return;
+  proto.name = newName;
+  var nameEl = document.getElementById('pname-'+pid);
+  if(nameEl) nameEl.textContent = newName;
+  saveDB();
+  pushProto(proto);
+  showToast('Nome atualizado');
+}
+
+/* build full workout HTML grouped by day */
+function buildFullWorkoutHtml(treino){
+  var keys = Object.keys(treino).sort();
+  if(!keys.length) return '<div class="empty" style="padding:8px 0">Sem treinos registrados</div>';
+  var html = '';
+  keys.forEach(function(k){
+    var day = treino[k];
+    if(!day.ex||!day.ex.length) return;
+    var d = new Date(k+'T12:00:00');
+    var dlbl = d.toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short',year:'2-digit'});
+    html += '<div class="proto-day-block">'
+      +'<div class="proto-day-lbl">'+dlbl+'</div>';
+    day.ex.forEach(function(ex){
+      var setRows = ex.sets.map(function(s,i){
+        var r=parseFloat(s.r)||0, w=parseFloat(s.w)||0, vol=r*w;
+        return '<tr>'
+          +'<td>'+(i+1)+'</td>'
+          +'<td>'+(s.n||'—')+'</td>'
+          +'<td>'+r+'</td>'
+          +'<td>'+w+'</td>'
+          +'<td class="vol">'+(vol>0?vol.toLocaleString('pt-BR'):'-')+'</td>'
+        +'</tr>';
+      }).join('');
+      html += '<div class="proto-ex-row">'
+        +'<div class="proto-ex-nm">'+esc(ex.name)+'</div>'
+        +'<div class="proto-ex-muscle">'+(ex.muscle||'—')+'</div>'
+        +'<table class="proto-sets-tbl">'
+          +'<thead><tr>'
+            +'<th>#</th><th>Obs</th><th>Reps</th><th>Peso</th><th>Volume</th>'
+          +'</tr></thead>'
+          +'<tbody>'+setRows+'</tbody>'
+        +'</table>'
+      +'</div>';
+    });
+    html += '</div>';
+  });
+  return html || '<div class="empty" style="padding:8px 0">Sem treinos registrados</div>';
+}
+
+/* pull protocols from cloud on boot */
+function pullProtos(cb){
+  fetch(SB_URL+'/rest/v1/protocolos?user_id=eq.'+USER_ID+'&select=proto_id,data&order=updated_at.asc',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){ return r.json(); })
+  .then(function(rows){
+    if(Array.isArray(rows)){
+      var ids = (DB.proto||[]).map(function(p){ return p.id; });
+      rows.forEach(function(row){
+        if(row.data && ids.indexOf(row.data.id)<0){
+          DB.proto.push(row.data);
+        }
+      });
+      saveDB();
+    }
+  }).catch(function(){}).then(cb||function(){});
 }
 
 /* ─────────── FAB SAVE ─────────── */
