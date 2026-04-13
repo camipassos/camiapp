@@ -891,18 +891,40 @@ function pushDieta(k){
 
 function pullFromCloud(cb){
   var done=0;
-  function tick(){ if(++done===2) cb(); }
+  function tick(){ if(++done===3) cb(); }
+
+  /* treino: REPLACE local completely with cloud state */
   fetch(SB_URL+'/rest/v1/treino?user_id=eq.'+USER_ID+'&select=day_key,data',{
     headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
   }).then(function(r){return r.json();}).then(function(rows){
-    if(Array.isArray(rows)) rows.forEach(function(r){ DB.t[r.day_key]=r.data; });
-    saveDB();
+    if(Array.isArray(rows)){
+      DB.t = {};   /* clear first, then fill from cloud */
+      rows.forEach(function(r){ DB.t[r.day_key]=r.data; });
+      saveDB();
+    }
   }).catch(function(){}).then(tick);
+
+  /* dieta: same */
   fetch(SB_URL+'/rest/v1/dieta?user_id=eq.'+USER_ID+'&select=day_key,data',{
     headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
   }).then(function(r){return r.json();}).then(function(rows){
-    if(Array.isArray(rows)) rows.forEach(function(r){ DB.d[r.day_key]=r.data; });
-    saveDB();
+    if(Array.isArray(rows)){
+      DB.d = {};
+      rows.forEach(function(r){ DB.d[r.day_key]=r.data; });
+      saveDB();
+    }
+  }).catch(function(){}).then(tick);
+
+  /* settings: pull protoStart so week numbering syncs */
+  fetch(SB_URL+'/rest/v1/settings?user_id=eq.'+USER_ID+'&select=key,value',{
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).then(function(r){return r.json();}).then(function(rows){
+    if(Array.isArray(rows)){
+      rows.forEach(function(r){
+        if(r.key==='protoStart' && r.value) DB.protoStart = r.value;
+      });
+      saveDB();
+    }
   }).catch(function(){}).then(tick);
 }
 
@@ -925,6 +947,7 @@ window.addEventListener('DOMContentLoaded', function(){
     /* first time: anchor to oldest treino key or today */
     var tkeys = Object.keys(DB.t).sort();
     DB.protoStart = tkeys.length ? tkeys[0] : today();
+    pushSetting('protoStart', DB.protoStart);
   }
   curDay = today();
   curWk  = weekNum(curDay);
@@ -1723,9 +1746,11 @@ function confirmFinalize(){
 
   saveDB();
   pushProto(proto);
-  /* clear cloud treino/dieta rows by pushing a marker — 
-     handled by fresh DB.t = {} locally; cloud rows stay 
-     but won't be pulled (user_id scoped and overwritten on new entries) */
+  /* delete all treino and dieta rows from cloud so other devices
+     also start fresh when they pull */
+  clearCloudTreino();
+  clearCloudDieta();
+  pushSetting('protoStart', DB.protoStart);
   closeFinalizeModal();
   document.getElementById('finName').value = '';
   gotoMain('histórico');
@@ -1737,6 +1762,28 @@ function pushProto(proto){
   fetch(SB_URL+'/rest/v1/protocolos?on_conflict=user_id,proto_id',{
     method:'POST', headers:sbH(),
     body:JSON.stringify({user_id:USER_ID, proto_id:String(proto.id), data:proto, updated_at:new Date().toISOString()})
+  }).catch(function(){});
+}
+
+function clearCloudTreino(){
+  fetch(SB_URL+'/rest/v1/treino?user_id=eq.'+USER_ID,{
+    method:'DELETE',
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).catch(function(){});
+}
+
+function clearCloudDieta(){
+  fetch(SB_URL+'/rest/v1/dieta?user_id=eq.'+USER_ID,{
+    method:'DELETE',
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+  }).catch(function(){});
+}
+
+function pushSetting(key, value){
+  fetch(SB_URL+'/rest/v1/settings?on_conflict=user_id,key',{
+    method:'POST',
+    headers:sbH(),
+    body:JSON.stringify({user_id:USER_ID, key:key, value:value, updated_at:new Date().toISOString()})
   }).catch(function(){});
 }
 
