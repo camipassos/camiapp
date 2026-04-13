@@ -18,19 +18,19 @@
   --s2:    #242424;
   --s3:    #2a2a2a;
   --s4:    #323232;
-  --acc:   #4F9CF9;
+  --acc:   #7335D9;
   --acc2:  #82bbfb;
-  --ndim:  rgba(79,156,249,.12);
-  --nfnt:  rgba(79,156,249,.05);
-  --nln:   rgba(79,156,249,.25);
-  --ngw:   rgba(79,156,249,.18);
-  --neon:  #4F9CF9;
+  --ndim:  rgba(115,53,217,.12);
+  --nfnt:  rgba(115,53,217,.05);
+  --nln:   rgba(115,53,217,.25);
+  --ngw:   rgba(115,53,217,.18);
+  --neon:  #7335D9;
   --neon2: #82bbfb;
   --white: #e0e0e0;
   --mid:   #a0a0a0;
   --dim:   #3a3a3a;
-  --bdr:   rgba(79,156,249,.10);
-  --bdrg:  rgba(79,156,249,.20);
+  --bdr:   rgba(115,53,217,.10);
+  --bdrg:  rgba(115,53,217,.20);
   --red:   #e05c5c;
   --rdim:  rgba(217,95,75,.13);
   --sky:   #60c8a0;
@@ -57,8 +57,8 @@ select{appearance:none;-webkit-appearance:none}
 #app::before{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   background:
-    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(79,156,249,.05) 0%, transparent 68%),
-    repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(79,156,249,.012) 3px,rgba(79,156,249,.012) 4px);
+    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(115,53,217,.05) 0%, transparent 68%),
+    repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(115,53,217,.012) 3px,rgba(115,53,217,.012) 4px);
 }
 
 /* ═══════════════════ HEADER ═══════════════════ */
@@ -278,7 +278,7 @@ select{appearance:none;-webkit-appearance:none}
 .chart-bars{display:flex;align-items:flex-end;gap:5px;height:80px}
 .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
 .bar-val{font-size:7px;color:var(--dim);line-height:1}
-.bar-body{width:100%;border-radius:3px 3px 0 0;background:rgba(79,156,249,.25);min-height:3px}
+.bar-body{width:100%;border-radius:3px 3px 0 0;background:rgba(115,53,217,.25);min-height:3px}
 .bar-body.cur{background:linear-gradient(to top,var(--neon),var(--neon2));box-shadow:none}
 .bar-wk{font-size:7px;color:var(--dim)}
 
@@ -350,7 +350,7 @@ select{appearance:none;-webkit-appearance:none}
 .dn-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;letter-spacing:.5px}
 
 .cal-hero{
-  background:linear-gradient(135deg,rgba(79,156,249,.10),rgba(79,156,249,.03));
+  background:linear-gradient(135deg,rgba(115,53,217,.10),rgba(115,53,217,.03));
   border:1px solid var(--bdrg);border-radius:var(--r);
   padding:20px;text-align:center;
 }
@@ -430,7 +430,7 @@ select{appearance:none;-webkit-appearance:none}
   box-shadow:0 1px 4px rgba(0,0,0,.25);
   /* make sure touch events fire */
   touch-action:manipulation;
-  -webkit-tap-highlight-color:rgba(79,156,249,.12);
+  -webkit-tap-highlight-color:rgba(115,53,217,.12);
 }
 .fab:active{opacity:.85;transform:scale(.99)}
 
@@ -530,7 +530,7 @@ select{appearance:none;-webkit-appearance:none}
   border-radius:20px;font-size:9px;font-weight:600;padding:3px 10px;
   letter-spacing:1px;text-transform:uppercase;white-space:nowrap;flex-shrink:0;
 }
-.proto-badge.active{background:rgba(79,156,249,.18);border-color:var(--neon)}
+.proto-badge.active{background:rgba(115,53,217,.18);border-color:var(--neon)}
 .proto-body{display:none;padding:0 16px 16px;border-top:1px solid var(--bdr)}
 .proto-body.on{display:block}
 .proto-section{margin-top:14px}
@@ -637,9 +637,28 @@ select{appearance:none;-webkit-appearance:none}
 .mush-nm{font-size:10px;color:var(--mid);width:88px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mush-bars{flex:1;display:flex;gap:3px;align-items:flex-end;height:36px}
 .mush-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;height:100%;justify-content:flex-end}
-.mush-bar{width:100%;border-radius:2px 2px 0 0;background:rgba(79,156,249,.25);min-height:2px}
+.mush-bar{width:100%;border-radius:2px 2px 0 0;background:rgba(115,53,217,.25);min-height:2px}
 .mush-bar.cur{background:var(--neon)}
 .mush-wk{font-size:7px;color:var(--dim)}
+
+/* ── muscle protocol comparison ── */
+.mushcomp-legend{display:flex;justify-content:space-between;margin-bottom:10px}
+.mushcomp-prev-lbl{font-size:9px;color:rgba(255,170,51,.9);font-weight:600;letter-spacing:.5px}
+.mushcomp-curr-lbl{font-size:9px;color:var(--neon);font-weight:600;letter-spacing:.5px}
+.mushcomp-row{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--bdr)}
+.mushcomp-row:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.mushcomp-nm{font-size:11px;font-weight:600;color:var(--white);margin-bottom:6px}
+.mushcomp-body{display:flex;flex-direction:column;gap:4px}
+.mushcomp-bar-row{display:flex;align-items:center;gap:6px}
+.mushcomp-lbl{font-size:8px;font-weight:600;width:30px;flex-shrink:0;letter-spacing:.3px}
+.mushcomp-lbl.prev{color:rgba(255,170,51,.8)}
+.mushcomp-lbl.curr{color:var(--neon)}
+.mushcomp-track{flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden}
+.mushcomp-fill{height:100%;border-radius:3px;transition:width .4s}
+.mushcomp-fill.prev{background:rgba(255,170,51,.55)}
+.mushcomp-fill.curr{background:var(--neon)}
+.mushcomp-stat{font-size:10px;color:var(--mid);white-space:nowrap;min-width:80px;text-align:right}
+.mushcomp-diff{font-size:10px;font-weight:600}
 </style>
 </head>
 <body>
@@ -650,17 +669,12 @@ select{appearance:none;-webkit-appearance:none}
   <div class="logo">CAMI</div>
   <div class="hdr-right">
     <div class="hdr-date" id="hdrDate"></div>
-    <div class="wk-pill-nav">
-      <button class="wk-nav-sm" onclick="hdrWkNav(-1)">&#8592;</button>
-      <span class="wk-pill-txt" id="wkPill">Semana 1</span>
-      <button class="wk-nav-sm" onclick="hdrWkNav(1)">&#8594;</button>
-    </div>
   </div>
 </div>
 
 <!-- MAIN TABS -->
 <div class="main-tabs">
-  <div class="mtab"    id="mt-historico" onclick="gotoMain('historico')">Anterior</div>
+  <div class="mtab"    id="mt-histórico" onclick="gotoMain('histórico')">Anterior</div>
   <div class="mtab on" id="mt-treino"    onclick="gotoMain('treino')">Treino</div>
   <div class="mtab"    id="mt-dieta"     onclick="gotoMain('dieta')">Dieta</div>
 </div>
@@ -669,7 +683,7 @@ select{appearance:none;-webkit-appearance:none}
 <div class="view on" id="view-treino">
   <div class="sub-tabs">
     <div class="stab on" id="st-dias"    onclick="gotoSub('dias')">Dias</div>
-    <div class="stab"    id="st-evol"    onclick="gotoSub('evol')">Evolucao</div>
+    <div class="stab"    id="st-evol"    onclick="gotoSub('evol')">Evolução</div>
   </div>
 
   <!-- sub: dias -->
@@ -680,14 +694,14 @@ select{appearance:none;-webkit-appearance:none}
       <button class="wn-btn" style="flex-shrink:0;margin:8px 4px 4px" onclick="scrollerWkNav(1)">&#8594;</button>
     </div>
     <div class="sbody">
-      <div class="sec">Exercicios</div>
+      <div class="sec">Exercícios</div>
       <div id="exList"></div>
       <button class="btn-add-ex" onclick="openModal()">+ Adicionar exercicio</button>
       <button class="btn-finalize" onclick="openFinalizeModal()">&#10003; Finalizar protocolo atual</button>
     </div>
   </div>
 
-  <!-- sub: evolucao -->
+  <!-- sub: evolução -->
   <div id="sub-evol" class="sbody hide">
     <div class="sec">Semana</div>
     <div class="wk-nav">
@@ -696,14 +710,8 @@ select{appearance:none;-webkit-appearance:none}
       <button class="wn-btn" onclick="chgWk(1)">&#8594;</button>
     </div>
 
-    <div class="sec">Series por grupo muscular</div>
+    <div class="sec">Séries por grupo muscular</div>
     <div class="mus-grid" id="musGrid"></div>
-
-    <div class="sec">Volume por semana</div>
-    <div class="chart-card">
-      <div class="chart-ttl">Volume total (kg) — ultimas semanas</div>
-      <div class="chart-bars" id="chartBars"></div>
-    </div>
 
     <div class="sec">Comparativo de semanas</div>
     <div class="comp-card">
@@ -715,16 +723,16 @@ select{appearance:none;-webkit-appearance:none}
       <div id="compRows"></div>
     </div>
 
-    <div class="sec">Historico de peso</div>
+    <div class="sec">Histórico de peso</div>
     <div class="wt-card">
       <div class="wt-ttl">Peso corporal — por semana</div>
       <svg class="wt-svg" id="wtSvg" viewBox="0 0 300 70" preserveAspectRatio="none"></svg>
       <div class="wt-stats" id="wtStats"></div>
     </div>
 
-    <div class="sec">Series por grupo muscular — historico</div>
+    <div class="sec">Séries por grupo muscular — histórico</div>
     <div class="chart-card" id="musHistCard">
-      <div class="chart-ttl">Series acumuladas por semana</div>
+      <div class="chart-ttl">Comparativo entre protocolos</div>
       <div id="musHistChart"></div>
     </div>
   </div>
@@ -754,7 +762,7 @@ select{appearance:none;-webkit-appearance:none}
     <div class="sec">Macronutrientes</div>
     <div class="mac-grid">
       <div class="mc"><div class="mc-lbl c">Carboidrato</div><input class="mc-in" type="number" id="inCarb" placeholder="0" oninput="calcMac()"><div class="mc-unit">g · 4 kcal/g</div></div>
-      <div class="mc"><div class="mc-lbl p">Proteina</div><input class="mc-in" type="number" id="inProt" placeholder="0" oninput="calcMac()"><div class="mc-unit">g · 4 kcal/g</div></div>
+      <div class="mc"><div class="mc-lbl p">Proteína</div><input class="mc-in" type="number" id="inProt" placeholder="0" oninput="calcMac()"><div class="mc-unit">g · 4 kcal/g</div></div>
       <div class="mc"><div class="mc-lbl f">Gordura</div><input class="mc-in" type="number" id="inFat" placeholder="0" oninput="calcMac()"><div class="mc-unit">g · 9 kcal/g</div></div>
       <div class="mc"><div class="mc-lbl k">Total kcal</div><div class="mc-disp" id="mcDisp">0</div><div class="mc-unit">kcal calculadas</div></div>
     </div>
@@ -765,13 +773,13 @@ select{appearance:none;-webkit-appearance:none}
       <div class="wt-inp-w"><input class="wt-in" type="number" id="inWt" placeholder="0.0"><span class="wt-kg">kg</span></div>
     </div>
 
-    <div class="sec">Historico semanal</div>
+    <div class="sec">Histórico semanal</div>
     <div id="allWeeksSumm"></div>
   </div>
 </div><!-- /dieta -->
 
 <!-- ══ HISTORICO VIEW ══ -->
-<div class="view" id="view-historico">
+<div class="view" id="view-histórico">
   <div class="sbody">
     <div class="sec">Protocolos finalizados</div>
     <div id="protoList"></div>
@@ -810,7 +818,7 @@ select{appearance:none;-webkit-appearance:none}
 <div class="overlay" id="fin-overlay" onclick="finOverlayBg(event)">
   <div class="fin-modal">
     <div class="fin-ttl">Finalizar protocolo</div>
-    <div class="fin-sub">Isso arquiva o treino e dieta atuais. Voce podera consultar e reativar depois.</div>
+    <div class="fin-sub">Isso arquiva o treino e dieta atuais. Você poderá consultar e reativar depois.</div>
     <input class="m-in" id="finName" placeholder="Nome do protocolo (ex: Hipertrofia Jan-Mar)">
     <div class="m-btns" style="margin-top:6px">
       <button class="m-btn m-cancel" onclick="closeFinalizeModal()">Cancelar</button>
@@ -894,7 +902,7 @@ var MUS = ['Peito','Costas','Ombro','Biceps','Triceps','Quadriceps',
 var curTab     = 'treino';
 var curSub     = 'dias';
 var curDay     = '';   /* YYYY-MM-DD */
-var curWk      = 1;    /* evolucao week */
+var curWk      = 1;    /* evolução week */
 var scrollerWk = 0;    /* 0 = current week; negative = weeks back */
 var dietOff    = 0;
 
@@ -1041,7 +1049,7 @@ function wkToMonday(targetWk){
 /* ─────────── MAIN TAB SWITCH ─────────── */
 function gotoMain(t){
   curTab = t;
-  ['treino','dieta','historico'].forEach(function(x){
+  ['treino','dieta','histórico'].forEach(function(x){
     document.getElementById('mt-'+x).classList.toggle('on', x===t);
     document.getElementById('view-'+x).classList.toggle('on', x===t);
   });
@@ -1116,7 +1124,7 @@ function copyPrev(){
   });
   tday(curDay).ex = cl;
   saveDB(); buildScroller(); renderEx();
-  showToast('Treino copiado com series, reps e peso');
+  showToast('Treino copiado com séries, reps e peso');
 }
 
 
@@ -1144,7 +1152,7 @@ function renderEx(){
       h.style.paddingTop='10px'; h.textContent='ou adicione manualmente abaixo';
       el.appendChild(h);
     } else {
-      el.innerHTML='<div class="empty">Nenhum exercicio para este dia.<br>Toque em + para adicionar.</div>';
+      el.innerHTML='<div class="empty">Nenhum exercício para este dia.<br>Toque em + para adicionar.</div>';
     }
     return;
   }
@@ -1168,7 +1176,7 @@ function renderEx(){
         +'<div class="drag-handle" title="Arrastar">&#9776;</div>'
         +'<div class="ex-info" onclick="togEx('+ei+')" style="flex:1;min-width:0">'
           +'<div class="ex-nm">'+esc(ex.name)+'</div>'
-          +'<div class="ex-sb">'+(esc(ex.muscle)||'—')+' · '+ex.sets.length+' serie'+(ex.sets.length!==1?'s':'')+'</div>'
+          +'<div class="ex-sb">'+(esc(ex.muscle)||'—')+' · '+ex.sets.length+' série'+(ex.sets.length!==1?'s':'')+'</div>'
         +'</div>'
         +'<div class="ex-vol" id="evol-'+ei+'">'+(vol>0?fmtN(vol):'0')+'<small> kg</small></div>'
         +'<div class="chv" id="chv-'+ei+'" onclick="togEx('+ei+')">&#8964;</div>'
@@ -1176,7 +1184,7 @@ function renderEx(){
       +'<div class="sets-wrap" id="sw-'+ei+'">'
         +'<div class="th-row">'
           +'<span class="th">#</span>'
-          +'<span class="th" style="text-align:left">Obs/Variacao</span>'
+          +'<span class="th" style="text-align:left">Obs/Variação</span>'
           +'<span class="th" style="text-align:left">Grupo Musc.</span>'
           +'<span class="th">Reps</span>'
           +'<span class="th">Peso</span>'
@@ -1238,7 +1246,7 @@ function addSet(ei){
 }
 function rmSet(ei,si){
   var ex=tday(curDay).ex[ei];
-  if(ex.sets.length<=1){ showToast('Minimo 1 serie'); return; }
+  if(ex.sets.length<=1){ showToast('Mínimo 1 série'); return; }
   ex.sets.splice(si,1); saveDB(); renderRows(ei);
 }
 function rmEx(ei){ tday(curDay).ex.splice(ei,1); saveDB(); renderEx(); }
@@ -1253,7 +1261,7 @@ function overlayBg(e){ if(e.target===document.getElementById('overlay')) closeMo
 function addEx(){
   var nm  = document.getElementById('mName').value.trim();
   var mus = document.getElementById('mMuscle').value;
-  if(!nm){ showToast('Informe o nome do exercicio'); return; }
+  if(!nm){ showToast('Informe o nome do exercício'); return; }
   tday(curDay).ex.push({ name:nm, muscle:mus||'Outros', sets:[{n:'',m:mus||'',r:'',w:''}] });
   saveDB();
   document.getElementById('mName').value='';
@@ -1265,7 +1273,7 @@ function addEx(){
 
 /* ─────────── EVOLUCAO ─────────── */
 function chgWk(d){ curWk=Math.max(1,curWk+d); document.getElementById('wnLbl').textContent='Semana '+curWk; renderEvol(); }
-function renderEvol(){ renderMusGrid(); renderVolChart(); renderComp(); renderWtChart(); renderMusHist(); }
+function renderEvol(){ renderMusGrid(); renderComp(); renderWtChart(); renderMusHist(); }
 
 function renderMusGrid(){
   var c=musSets(curWk), g=document.getElementById('musGrid'), ks=Object.keys(c);
@@ -1276,7 +1284,7 @@ function renderMusGrid(){
       return '<div class="mus-card">'
         +'<div class="mus-nm">'+m+'</div>'
         +'<div class="mus-n">'+s+'</div>'
-        +'<div class="mus-sb">series</div>'
+        +'<div class="mus-sb">séries</div>'
         +'<div class="mus-sb" style="color:var(--neon2);margin-top:3px">'+r+' reps</div>'
       +'</div>';
     }).join('');
@@ -1320,50 +1328,76 @@ function renderMusHist(){
   var el = document.getElementById('musHistChart');
   if(!el) return;
 
-  /* collect all weeks that have data */
-  var allWks = [];
-  var seen = {};
+  /* build musVol for current active protocol from DB.t */
+  var currMus = {};
   Object.keys(DB.t).forEach(function(k){
-    var w = weekNum(k);
-    if(!seen[w]){ seen[w]=1; allWks.push(w); }
+    DB.t[k].ex.forEach(function(e){
+      e.sets.forEach(function(s){
+        var m = s.m || e.muscle || ''; if(!m) return;
+        if(!currMus[m]) currMus[m]={sets:0,reps:0};
+        var r=parseFloat(s.r)||0;
+        currMus[m].sets++;
+        currMus[m].reps+=r;
+      });
+    });
   });
-  allWks.sort(function(a,b){ return a-b; });
-  var show = allWks.slice(-8); /* last 8 weeks */
+  /* average by number of weeks in current protocol */
+  var seenW={}, wksNow=[];
+  Object.keys(DB.t).forEach(function(k){ var w=weekNum(k); if(!seenW[w]){seenW[w]=1;wksNow.push(w);} });
+  var nwk = Math.max(1, wksNow.length);
+  Object.keys(currMus).forEach(function(m){
+    currMus[m].sets = Math.round(currMus[m].sets/nwk);
+    currMus[m].reps = Math.round(currMus[m].reps/nwk);
+  });
 
-  if(!show.length){
+  /* last finished protocol */
+  var prevProto = DB.proto && DB.proto.length ? DB.proto[DB.proto.length-1] : null;
+  var prevMus   = prevProto ? (prevProto.musVol||{}) : {};
+
+  /* all muscles across both */
+  var allMus={};
+  Object.keys(currMus).forEach(function(m){allMus[m]=1;});
+  Object.keys(prevMus).forEach(function(m){allMus[m]=1;});
+  var muscles = Object.keys(allMus).sort();
+
+  if(!muscles.length){
     el.innerHTML='<div class="empty">Sem dados ainda</div>';
     return;
   }
 
-  /* gather all muscles present */
-  var allMus = {};
-  show.forEach(function(w){
-    var c = musSets(w);
-    Object.keys(c).forEach(function(m){ allMus[m]=1; });
-  });
-  var muscles = Object.keys(allMus).sort();
-  if(!muscles.length){ el.innerHTML='<div class="empty">Sem dados</div>'; return; }
+  var prevName = prevProto ? prevProto.name : 'Protocolo anterior';
 
-  /* for each muscle, render a mini bar row across weeks */
-  var html = '';
+  var html = '<div style="display:flex;justify-content:flex-end;gap:12px;margin-bottom:12px;padding-right:2px">'
+    +'<span style="font-size:9px;color:rgba(255,170,51,.9)">&#9632; '+esc(prevName)+'</span>'
+    +'<span style="font-size:9px;color:var(--neon)">&#9632; Protocolo atual</span>'
+    +'</div>';
+
   muscles.forEach(function(m){
-    var vals = show.map(function(w){
-      var c = musSets(w);
-      return c[m] ? (c[m].sets||0) : 0;
-    });
-    var mx = Math.max.apply(null, vals.concat([1]));
-    var bars = show.map(function(w,i){
-      var h = Math.max(2, Math.round(vals[i]/mx*32));
-      return '<div class="mush-col">'
-        +'<div class="mush-bar'+(w===curWk?' cur':'')+'" style="height:'+h+'px"></div>'
-        +'<div class="mush-wk">S'+w+'</div>'
-      +'</div>';
-    }).join('');
-    html += '<div class="mush-row">'
-      +'<div class="mush-nm">'+m+'</div>'
-      +'<div class="mush-bars">'+bars+'</div>'
+    var p  = prevMus[m]  || {sets:0,reps:0};
+    var c  = currMus[m]  || {sets:0,reps:0};
+    var ps = p.sets||0, pr = p.reps||0;
+    var cs = c.sets||0, cr = c.reps||0;
+    var mx = Math.max(ps, cs, 1);
+    var pPct = Math.round(ps/mx*100);
+    var cPct = Math.round(cs/mx*100);
+
+    html += '<div style="margin-bottom:14px">'
+      +'<div style="font-size:11px;font-weight:600;color:var(--white);margin-bottom:6px">'+m+'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
+        +'<div style="flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden">'
+          +'<div style="width:'+pPct+'%;height:100%;background:rgba(255,170,51,.6);border-radius:3px;transition:width .4s"></div>'
+        +'</div>'
+        +'<span style="font-size:10px;color:rgba(255,170,51,.9);width:88px;flex-shrink:0;text-align:right">'+ps+' sér · '+pr+' reps</span>'
+      +'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px">'
+        +'<div style="flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden">'
+          +'<div style="width:'+cPct+'%;height:100%;background:var(--neon);border-radius:3px;transition:width .4s"></div>'
+        +'</div>'
+        +'<span style="font-size:10px;color:var(--neon);width:88px;flex-shrink:0;text-align:right">'+cs+' sér · '+cr+' reps</span>'
+      +'</div>'
     +'</div>';
   });
+
   el.innerHTML = html;
 }
 
@@ -1392,19 +1426,19 @@ function renderWtChart(){
   var pth='M'+pts2.map(function(p){ return p.x+','+p.y; }).join(' L');
   var fil='M'+pts2[0].x+',70 L'+pts2.map(function(p){ return p.x+','+p.y; }).join(' L')+' L'+pts2[pts2.length-1].x+',70 Z';
   sv.innerHTML='<defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">'
-    +'<stop offset="0%" stop-color="#4F9CF9" stop-opacity=".20"/>'
-    +'<stop offset="100%" stop-color="#4F9CF9" stop-opacity="0"/>'
+    +'<stop offset="0%" stop-color="#7335D9" stop-opacity=".20"/>'
+    +'<stop offset="100%" stop-color="#7335D9" stop-opacity="0"/>'
     +'</linearGradient></defs>'
     +'<path d="'+fil+'" fill="url(#wg)"/>'
-    +'<path d="'+pth+'" fill="none" stroke="#4F9CF9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'
-    +pts2.map(function(p){ return '<circle cx="'+p.x+'" cy="'+p.y+'" r="2.5" fill="#4F9CF9"/>'; }).join('')
+    +'<path d="'+pth+'" fill="none" stroke="#7335D9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'
+    +pts2.map(function(p){ return '<circle cx="'+p.x+'" cy="'+p.y+'" r="2.5" fill="#7335D9"/>'; }).join('')
     +pts2.map(function(p,i){ return (i===0||i===pts2.length-1)?'<text x="'+p.x+'" y="'+(p.y-7)+'" text-anchor="middle" fill="#3d4a5c" font-size="7" font-family="Sora">'+p.w+'</text>':''; }).join('')
     +pts2.map(function(p){ return p.lbl?'<text x="'+p.x+'" y="68" text-anchor="middle" fill="#3d4a5c" font-size="7" font-family="Sora">'+p.lbl+'</text>':''; }).join('');
   var avg=(ws.reduce(function(a,b){ return a+b; },0)/ws.length).toFixed(1);
-  var diff=(ws[ws.length-1]-ws[0]).toFixed(1), dc=+diff<0?'#4F9CF9':+diff>0?'#ff3366':'#3d4a5c';
+  var diff=(ws[ws.length-1]-ws[0]).toFixed(1), dc=+diff<0?'#7335D9':+diff>0?'#ff3366':'#3d4a5c';
   se.innerHTML=
     '<div class="ws-it"><div class="ws-val">'+Math.min.apply(null,ws)+'</div><div class="ws-lbl">Min</div></div>'
-    +'<div class="ws-it"><div class="ws-val">'+avg+'</div><div class="ws-lbl">Media</div></div>'
+    +'<div class="ws-it"><div class="ws-val">'+avg+'</div><div class="ws-lbl">Média</div></div>'
     +'<div class="ws-it"><div class="ws-val">'+Math.max.apply(null,ws)+'</div><div class="ws-lbl">Max</div></div>'
     +'<div class="ws-it"><div class="ws-val" style="color:'+dc+'">'+(+diff>0?'+':'')+diff+'</div><div class="ws-lbl">Var.</div></div>';
 }
@@ -1658,18 +1692,22 @@ function confirmFinalize(){
   };
 
   DB.proto.push(proto);
-  /* keep DB.t intact so calendar stays populated.
-     Reset diet, set new protocol start anchor, reset navigation. */
+  /* clear treino and dieta — fresh start for new protocol */
+  DB.t = {};
   DB.d = {};
   DB.protoStart = today();   /* week 1 restarts from today */
   scrollerWk = 0;
   curWk = 1;
+  curDay = today();
 
   saveDB();
   pushProto(proto);
+  /* clear cloud treino/dieta rows by pushing a marker — 
+     handled by fresh DB.t = {} locally; cloud rows stay 
+     but won't be pulled (user_id scoped and overwritten on new entries) */
   closeFinalizeModal();
   document.getElementById('finName').value = '';
-  gotoMain('historico');
+  gotoMain('histórico');
   showToast('Protocolo "'+name+'" arquivado!');
 }
 
@@ -1722,7 +1760,7 @@ function renderProtos(){
     var dateRange = fmtD(d0)+' – '+fmtD(d1);
     var pid = proto.id;
 
-    /* ── 1. Series por grupo muscular (not volume) ── */
+    /* ── 1. Séries por grupo muscular (not volume) ── */
     var musKeys = Object.keys(proto.musVol||{});
     var musHtml = musKeys.length
       ? '<div class="proto-mus-grid">'
@@ -1732,7 +1770,7 @@ function renderProtos(){
                 return '<div class="proto-mus-card">'
                   +'<div class="proto-mus-nm">'+m+'</div>'
                   +'<div class="proto-mus-v">'+(v.sets||0)+'</div>'
-                  +'<div class="proto-mus-sb">series</div>'
+                  +'<div class="proto-mus-sb">séries</div>'
                   +'</div>';
               }).join('')
           +'</div>'
@@ -1743,7 +1781,7 @@ function renderProtos(){
     var fwStr = proto.finalWt ? proto.finalWt+' kg' : '—';
     var dietHtml =
       '<div class="proto-diet-row"><span class="proto-diet-k">Peso final</span><span class="proto-diet-v">'+fwStr+'</span></div>'
-      +'<div class="proto-diet-row"><span class="proto-diet-k">Kcal medias</span><span class="proto-diet-v hi">'+(da.kcal||0).toLocaleString('pt-BR')+'</span></div>'
+      +'<div class="proto-diet-row"><span class="proto-diet-k">Kcal médias</span><span class="proto-diet-v hi">'+(da.kcal||0).toLocaleString('pt-BR')+'</span></div>'
       +'<div class="proto-diet-row"><span class="proto-diet-k">Carb</span><span class="proto-diet-v">'+(da.c||0)+'g</span></div>'
       +'<div class="proto-diet-row"><span class="proto-diet-k">Prot</span><span class="proto-diet-v">'+(da.p||0)+'g</span></div>'
       +'<div class="proto-diet-row"><span class="proto-diet-k">Gord</span><span class="proto-diet-v">'+(da.f||0)+'g</span></div>';
@@ -1769,10 +1807,10 @@ function renderProtos(){
       /* body — hidden by default, opens on click */
       +'<div class="proto-body" id="pb-'+pid+'">'
 
-        /* sub-section: Series por grupo muscular */
+        /* sub-section: Séries por grupo muscular */
         +'<div class="proto-sub">'
           +'<div class="proto-sub-hdr" data-action="togSub" data-target="psm-'+pid+'">'
-            +'Series por grupo muscular'
+            +'Séries por grupo muscular'
             +'<div class="chv" id="chv-psm-'+pid+'">&#8964;</div>'
           +'</div>'
           +'<div class="proto-sub-body" id="psm-'+pid+'">'+musHtml+'</div>'
