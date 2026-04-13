@@ -818,21 +818,70 @@ function finOverlayBg(e){if(e.target.id==='fin-overlay')closeFinalizeModal();}
 function confirmFinalize(){
   var name=document.getElementById('finName').value.trim();if(!name){showToast('Dê um nome ao protocolo');return;}
   if(!DB.proto)DB.proto=[];
-  var tKeys=Object.keys(DB.t).sort(),dKeys=Object.keys(DB.d||{}).sort();
-  var allKeys=tKeys.concat(dKeys).sort();
-  var startDate=allKeys.length?allKeys[0]:today(),endDate=allKeys.length?allKeys[allKeys.length-1]:today();
+
+  /* ── Determine "last week": the 7 days up to and including today ── */
+  var todayK=today();
+  var lastWkStart=addD(todayK,-6); /* 6 days back = Mon if today is Sun, etc */
+  /* actually: find the Monday of the current week */
+  var todayD=new Date(todayK+'T12:00:00'), dow=todayD.getDay()||7;
+  var monD=new Date(todayD); monD.setDate(todayD.getDate()-(dow-1));
+  var monK=localKey(monD);
+  /* last week = Monday of current week .. today */
+  function inLastWeek(k){ return k>=monK && k<=todayK; }
+
+  /* ── Treino: only keep last-week keys for archiving ── */
+  var allTKeys=Object.keys(DB.t).sort();
+  var lastWkTreino={};
+  allTKeys.forEach(function(k){ if(inLastWeek(k)) lastWkTreino[k]=DB.t[k]; });
+
+  /* ── Muscle summary: from last week only ── */
   var musRaw={};
-  tKeys.forEach(function(k){DB.t[k].ex.forEach(function(e){var exM=e.muscle||'';e.sets.forEach(function(s){var m=(s.m&&s.m.trim()!=='')?s.m.trim():exM;if(!m)return;if(!musRaw[m])musRaw[m]={sets:0,reps:0,vol:0};var r=parseFloat(s.r)||0,w=parseFloat(s.w)||0;musRaw[m].sets++;musRaw[m].reps+=r;musRaw[m].vol+=r*w;});});});
-  var totalWks=Math.max(1,weekNum(endDate)-weekNum(startDate)+1);
-  var musVol={};Object.keys(musRaw).forEach(function(m){musVol[m]={sets:Math.round(musRaw[m].sets/totalWks),reps:Math.round(musRaw[m].reps/totalWks),vol:Math.round(musRaw[m].vol/totalWks)};});
-  var lastWkNum=0;dKeys.forEach(function(k){var w=weekNum(k);if(w>lastWkNum)lastWkNum=w;});
-  var lastWkKeys=lastWkNum?daysOfWeek(lastWkNum):[];
-  var lastEnts=lastWkKeys.map(function(k){return DB.d&&DB.d[k];}).filter(Boolean);
+  Object.keys(lastWkTreino).forEach(function(k){
+    lastWkTreino[k].ex.forEach(function(e){
+      var exM=(e.muscle||'').trim();
+      e.sets.forEach(function(s){
+        var m=normMus((s.m&&s.m.trim()!=='')?s.m.trim():exM);
+        var label=(s.m&&s.m.trim()!=='')?s.m.trim():exM;
+        if(!label)return;
+        if(!musRaw[m])musRaw[m]={label:label,sets:0,reps:0,vol:0};
+        var r=parseFloat(s.r)||0,w=parseFloat(s.w)||0;
+        musRaw[m].sets++;musRaw[m].reps+=r;musRaw[m].vol+=r*w;
+      });
+    });
+  });
+  /* no division — these are the actual totals for the last week */
+  var musVol={};
+  Object.keys(musRaw).forEach(function(k){
+    var lbl=musRaw[k].label;
+    musVol[lbl]={sets:musRaw[k].sets,reps:musRaw[k].reps,vol:musRaw[k].vol};
+  });
+
+  /* ── Diet: last week only ── */
+  var dKeys=Object.keys(DB.d||{}).sort();
+  var lastWkDKeys=dKeys.filter(function(k){return inLastWeek(k);});
+  var lastEnts=lastWkDKeys.map(function(k){return DB.d[k];}).filter(Boolean);
   var dietAvg={c:0,p:0,f:0,kcal:0,wt:null};
-  if(lastEnts.length){var avg=function(f){return Math.round(lastEnts.reduce(function(s,e){return s+(parseFloat(e[f])||0);},0)/lastEnts.length);};dietAvg.c=avg('c');dietAvg.p=avg('p');dietAvg.f=avg('f');dietAvg.kcal=Math.round(dietAvg.c*4+dietAvg.p*4+dietAvg.f*9);var wts=lastEnts.filter(function(e){return e.wt;}).map(function(e){return parseFloat(e.wt);});if(wts.length)dietAvg.wt=parseFloat((wts.reduce(function(a,b){return a+b;},0)/wts.length).toFixed(1));}
-  var finalWt=null;dKeys.slice().reverse().forEach(function(k){if(!finalWt&&DB.d[k]&&DB.d[k].wt)finalWt=parseFloat(DB.d[k].wt);});
-  var proto={id:Date.now(),name:name,startDate:startDate,endDate:endDate,treino:JSON.parse(JSON.stringify(DB.t)),musVol:musVol,dietAvg:dietAvg,finalWt:finalWt,weeks:totalWks};
+  if(lastEnts.length){
+    var avg=function(f){return Math.round(lastEnts.reduce(function(s,e){return s+(parseFloat(e[f])||0);},0)/lastEnts.length);};
+    dietAvg.c=avg('c');dietAvg.p=avg('p');dietAvg.f=avg('f');
+    dietAvg.kcal=Math.round(dietAvg.c*4+dietAvg.p*4+dietAvg.f*9);
+    var wts=lastEnts.filter(function(e){return e.wt;}).map(function(e){return parseFloat(e.wt);});
+    if(wts.length)dietAvg.wt=parseFloat((wts.reduce(function(a,b){return a+b;},0)/wts.length).toFixed(1));
+  }
+  var finalWt=null;
+  dKeys.slice().reverse().forEach(function(k){if(!finalWt&&DB.d[k]&&DB.d[k].wt)finalWt=parseFloat(DB.d[k].wt);});
+
+  var proto={
+    id:Date.now(),name:name,
+    startDate:monK,endDate:todayK,
+    treino:lastWkTreino,        /* only last week's workouts */
+    musVol:musVol,
+    dietAvg:dietAvg,finalWt:finalWt,
+    weeks:1
+  };
+
   DB.proto.push(proto);
+  /* wipe everything — old data discarded, last week already archived */
   DB.t={};DB.d={};
   DB.protoStart=today();scrollerWk=0;curWk=1;curDay=today();
   saveDB();pushProto(proto);clearCloudTreino();clearCloudDieta();pushSetting('protoStart',DB.protoStart);
