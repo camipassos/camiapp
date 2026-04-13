@@ -832,7 +832,7 @@ function confirmFinalize(){
   /* ── Treino: only keep last-week keys for archiving ── */
   var allTKeys=Object.keys(DB.t).sort();
   var lastWkTreino={};
-  allTKeys.forEach(function(k){ if(inLastWeek(k)) lastWkTreino[k]=DB.t[k]; });
+  allTKeys.forEach(function(k){ if(inLastWeek(k)) lastWkTreino[k]=JSON.parse(JSON.stringify(DB.t[k])); });
 
   /* ── Muscle summary: from last week only ── */
   var musRaw={};
@@ -874,7 +874,7 @@ function confirmFinalize(){
   var proto={
     id:Date.now(),name:name,
     startDate:monK,endDate:todayK,
-    treino:lastWkTreino,        /* only last week's workouts */
+    treino:JSON.parse(JSON.stringify(lastWkTreino)), /* deep copy — no reference to DB.t */
     musVol:musVol,
     dietAvg:dietAvg,finalWt:finalWt,
     weeks:1
