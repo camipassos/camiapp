@@ -523,19 +523,29 @@ function tday(k){if(!DB.t[k])DB.t[k]={ex:[]};return DB.t[k];}
 function sVol(s){return(parseFloat(s.r)||0)*(parseFloat(s.w)||0);}
 function eVol(e){return e.sets.reduce(function(a,s){return a+sVol(s);},0);}
 function wkVol(w){return Object.keys(DB.t).filter(function(k){return weekNum(k)===w;}).reduce(function(a,k){return a+DB.t[k].ex.reduce(function(b,e){return b+eVol(e);},0);},0);}
+function normMus(s){ return s ? s.trim().toLowerCase() : ''; }
 function musSets(w){
+  /* canonical: { normKey: {label, sets, reps, vol} } */
   var c={};
   Object.keys(DB.t).filter(function(k){return weekNum(k)===w;}).forEach(function(k){
     DB.t[k].ex.forEach(function(e){
+      var exMuscle = (e.muscle||'').trim();
       e.sets.forEach(function(s){
-        var g=(s.m&&s.m!=='')?s.m:e.muscle; if(!g)return;
-        if(!c[g])c[g]={sets:0,reps:0,vol:0};
-        var r=parseFloat(s.r)||0,wt=parseFloat(s.w)||0;
-        c[g].sets++;c[g].reps+=r;c[g].vol+=r*wt;
+        var raw = (s.m && s.m.trim()!=='') ? s.m.trim() : exMuscle;
+        if(!raw) return;
+        var key = normMus(raw);
+        if(!c[key]) c[key]={label:raw, sets:0, reps:0, vol:0};
+        var r=parseFloat(s.r)||0, wt=parseFloat(s.w)||0;
+        c[key].sets++;
+        c[key].reps += r;
+        c[key].vol  += r * wt;
       });
     });
   });
-  return c;
+  /* return keyed by display label for backwards compat */
+  var out={};
+  Object.keys(c).forEach(function(k){ out[c[k].label]=c[k]; });
+  return out;
 }
 
 /* ── HEADER ── */
@@ -713,7 +723,9 @@ function renderMusHist(){
   /* current protocol avg */
   var currMus={};
   var tKeys=Object.keys(DB.t).filter(function(k){return DB.t[k].ex&&DB.t[k].ex.length;});
-  tKeys.forEach(function(k){DB.t[k].ex.forEach(function(e){e.sets.forEach(function(s){var m=(s.m&&s.m!=='')?s.m:e.muscle;if(!m)return;if(!currMus[m])currMus[m]={sets:0,reps:0};currMus[m].sets++;currMus[m].reps+=parseFloat(s.r)||0;});});});
+  tKeys.forEach(function(k){DB.t[k].ex.forEach(function(e){var exM=(e.muscle||'').trim();e.sets.forEach(function(s){var raw=(s.m&&s.m.trim()!=='')?s.m.trim():exM;if(!raw)return;var key=normMus(raw);if(!currMus[key])currMus[key]={label:raw,sets:0,reps:0};currMus[key].sets++;currMus[key].reps+=parseFloat(s.r)||0;});});});
+  /* remap to label keys */
+  var currMus2={};Object.keys(currMus).forEach(function(k){currMus2[currMus[k].label]=currMus[k];});currMus=currMus2;
   var seenW={},wkC=[];tKeys.forEach(function(k){var w=weekNum(k);if(!seenW[w]){seenW[w]=1;wkC.push(w);}});
   var nwk=Math.max(1,wkC.length);
   Object.keys(currMus).forEach(function(m){currMus[m].sets=Math.round(currMus[m].sets/nwk);currMus[m].reps=Math.round(currMus[m].reps/nwk);});
@@ -810,7 +822,7 @@ function confirmFinalize(){
   var allKeys=tKeys.concat(dKeys).sort();
   var startDate=allKeys.length?allKeys[0]:today(),endDate=allKeys.length?allKeys[allKeys.length-1]:today();
   var musRaw={};
-  tKeys.forEach(function(k){DB.t[k].ex.forEach(function(e){e.sets.forEach(function(s){var m=s.m||e.muscle||'';if(!m)return;if(!musRaw[m])musRaw[m]={sets:0,reps:0,vol:0};var r=parseFloat(s.r)||0,w=parseFloat(s.w)||0;musRaw[m].sets++;musRaw[m].reps+=r;musRaw[m].vol+=r*w;});});});
+  tKeys.forEach(function(k){DB.t[k].ex.forEach(function(e){var exM=e.muscle||'';e.sets.forEach(function(s){var m=(s.m&&s.m.trim()!=='')?s.m.trim():exM;if(!m)return;if(!musRaw[m])musRaw[m]={sets:0,reps:0,vol:0};var r=parseFloat(s.r)||0,w=parseFloat(s.w)||0;musRaw[m].sets++;musRaw[m].reps+=r;musRaw[m].vol+=r*w;});});});
   var totalWks=Math.max(1,weekNum(endDate)-weekNum(startDate)+1);
   var musVol={};Object.keys(musRaw).forEach(function(m){musVol[m]={sets:Math.round(musRaw[m].sets/totalWks),reps:Math.round(musRaw[m].reps/totalWks),vol:Math.round(musRaw[m].vol/totalWks)};});
   var lastWkNum=0;dKeys.forEach(function(k){var w=weekNum(k);if(w>lastWkNum)lastWkNum=w;});
