@@ -292,7 +292,7 @@ select{appearance:none;-webkit-appearance:none}
 .comp-track{flex:1;height:5px;background:var(--s3);border-radius:3px;overflow:hidden}
 .comp-fill{height:100%;border-radius:3px}
 /* prev bar color moved below */
-.comp-fill.curr{background:var(--neon);box-shadow:none}
+.comp-fill.curr{background:rgba(255,170,51,.80);box-shadow:none}
 .comp-lbl{font-size:8px;color:var(--dim);width:28px;text-align:right;flex-shrink:0}
 .leg{display:flex;gap:14px;margin-bottom:12px}
 .leg-item{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--mid)}
@@ -509,9 +509,9 @@ select{appearance:none;-webkit-appearance:none}
 }
 
 /* ── comparativo prev bar: visible color ── */
-.comp-fill.prev{background:rgba(255,170,51,.50)}
-.comp-fill.curr{background:var(--neon);box-shadow:none}
-.comp-legend-prev{color:rgba(255,170,51,.9)}
+.comp-fill.prev{background:rgba(223,208,184,.35)}
+.comp-fill.curr{background:rgba(255,170,51,.80);box-shadow:none}
+.comp-legend-prev{color:rgba(223,208,184,.8)}
 
 /* ═══════════════════ HISTORICO ═══════════════════ */
 .proto-card{
@@ -643,7 +643,7 @@ select{appearance:none;-webkit-appearance:none}
 
 /* ── muscle protocol comparison ── */
 .mushcomp-legend{display:flex;justify-content:space-between;margin-bottom:10px}
-.mushcomp-prev-lbl{font-size:9px;color:rgba(255,170,51,.9);font-weight:600;letter-spacing:.5px}
+.mushcomp-prev-lbl{font-size:9px;color:rgba(223,208,184,.8);font-weight:600;letter-spacing:.5px}
 .mushcomp-curr-lbl{font-size:9px;color:var(--neon);font-weight:600;letter-spacing:.5px}
 .mushcomp-row{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--bdr)}
 .mushcomp-row:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
@@ -651,14 +651,27 @@ select{appearance:none;-webkit-appearance:none}
 .mushcomp-body{display:flex;flex-direction:column;gap:4px}
 .mushcomp-bar-row{display:flex;align-items:center;gap:6px}
 .mushcomp-lbl{font-size:8px;font-weight:600;width:30px;flex-shrink:0;letter-spacing:.3px}
-.mushcomp-lbl.prev{color:rgba(255,170,51,.8)}
+.mushcomp-lbl.prev{color:rgba(223,208,184,.7)}
 .mushcomp-lbl.curr{color:var(--neon)}
 .mushcomp-track{flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden}
 .mushcomp-fill{height:100%;border-radius:3px;transition:width .4s}
-.mushcomp-fill.prev{background:rgba(255,170,51,.55)}
-.mushcomp-fill.curr{background:var(--neon)}
+.mushcomp-fill.prev{background:rgba(223,208,184,.40)}
+.mushcomp-fill.curr{background:rgba(255,170,51,.80)}
 .mushcomp-stat{font-size:10px;color:var(--mid);white-space:nowrap;min-width:80px;text-align:right}
 .mushcomp-diff{font-size:10px;font-weight:600}
+
+/* ── exercise name edit ── */
+.ex-edit-btn{
+  background:none;border:none;color:var(--mid);font-size:12px;
+  padding:4px 5px;border-radius:var(--rxs);cursor:pointer;flex-shrink:0;
+  transition:color .15s;
+}
+.ex-edit-btn:active{color:var(--neon)}
+.ex-name-input{
+  background:var(--s3);border:1px solid var(--nln);border-radius:var(--rxs);
+  color:var(--white);font-family:'Sora',sans-serif;font-weight:600;font-size:14px;
+  padding:3px 8px;width:100%;outline:none;
+}
 </style>
 </head>
 <body>
@@ -717,8 +730,8 @@ select{appearance:none;-webkit-appearance:none}
     <div class="comp-card">
       <div class="comp-ttl">Volume por grupo muscular</div>
       <div class="leg">
-        <div class="leg-item"><div class="leg-dot" style="background:rgba(255,170,51,.7)"></div><span class="comp-legend-prev">Sem. anterior</span></div>
-        <div class="leg-item"><div class="leg-dot" style="background:var(--neon)"></div>Sem. atual</div>
+        <div class="leg-item"><div class="leg-dot" style="background:rgba(223,208,184,.6)"></div><span class="comp-legend-prev">Sem. anterior</span></div>
+        <div class="leg-item"><div class="leg-dot" style="background:rgba(255,170,51,.8)"></div>Sem. atual</div>
       </div>
       <div id="compRows"></div>
     </div>
@@ -1174,9 +1187,12 @@ function renderEx(){
     c.innerHTML =
       '<div class="ex-hdr">'
         +'<div class="drag-handle" title="Arrastar">&#9776;</div>'
-        +'<div class="ex-info" onclick="togEx('+ei+')" style="flex:1;min-width:0">'
-          +'<div class="ex-nm">'+esc(ex.name)+'</div>'
-          +'<div class="ex-sb">'+(esc(ex.muscle)||'—')+' · '+ex.sets.length+' série'+(ex.sets.length!==1?'s':'')+'</div>'
+        +'<div class="ex-info" style="flex:1;min-width:0">'
+          +'<div style="display:flex;align-items:center;gap:4px">'
+            +'<div class="ex-nm" id="exnm-'+ei+'" onclick="togEx('+ei+')" style="flex:1;cursor:pointer">'+esc(ex.name)+'</div>'
+            +'<button class="ex-edit-btn" onclick="editExName('+ei+')" title="Renomear">&#9998;</button>'
+          +'</div>'
+          +'<div class="ex-sb" onclick="togEx('+ei+')" style="cursor:pointer">'+(esc(ex.muscle)||'—')+' · '+ex.sets.length+' série'+(ex.sets.length!==1?'s':'')+'</div>'
         +'</div>'
         +'<div class="ex-vol" id="evol-'+ei+'">'+(vol>0?fmtN(vol):'0')+'<small> kg</small></div>'
         +'<div class="chv" id="chv-'+ei+'" onclick="togEx('+ei+')">&#8964;</div>'
@@ -1341,9 +1357,14 @@ function renderMusHist(){
       });
     });
   });
-  /* average by number of weeks in current protocol */
+  /* average by number of weeks — count distinct calendar weeks with any data */
   var seenW={}, wksNow=[];
-  Object.keys(DB.t).forEach(function(k){ var w=weekNum(k); if(!seenW[w]){seenW[w]=1;wksNow.push(w);} });
+  Object.keys(DB.t).forEach(function(k){
+    if(DB.t[k].ex && DB.t[k].ex.length){
+      var w=weekNum(k);
+      if(!seenW[w]){seenW[w]=1;wksNow.push(w);}
+    }
+  });
   var nwk = Math.max(1, wksNow.length);
   Object.keys(currMus).forEach(function(m){
     currMus[m].sets = Math.round(currMus[m].sets/nwk);
@@ -1368,8 +1389,8 @@ function renderMusHist(){
   var prevName = prevProto ? prevProto.name : 'Protocolo anterior';
 
   var html = '<div style="display:flex;justify-content:flex-end;gap:12px;margin-bottom:12px;padding-right:2px">'
-    +'<span style="font-size:9px;color:rgba(255,170,51,.9)">&#9632; '+esc(prevName)+'</span>'
-    +'<span style="font-size:9px;color:var(--neon)">&#9632; Protocolo atual</span>'
+    +'<span style="font-size:9px;color:rgba(223,208,184,.8)">&#9632; '+esc(prevName)+'</span>'
+    +'<span style="font-size:9px;color:rgba(255,170,51,.9)">&#9632; Protocolo atual</span>'
     +'</div>';
 
   muscles.forEach(function(m){
@@ -1385,13 +1406,13 @@ function renderMusHist(){
       +'<div style="font-size:11px;font-weight:600;color:var(--white);margin-bottom:6px">'+m+'</div>'
       +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
         +'<div style="flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden">'
-          +'<div style="width:'+pPct+'%;height:100%;background:rgba(255,170,51,.6);border-radius:3px;transition:width .4s"></div>'
+          +'<div style="width:'+pPct+'%;height:100%;background:rgba(223,208,184,.40);border-radius:3px;transition:width .4s"></div>'
         +'</div>'
-        +'<span style="font-size:10px;color:rgba(255,170,51,.9);width:88px;flex-shrink:0;text-align:right">'+ps+' sér · '+pr+' reps</span>'
+        +'<span style="font-size:10px;color:rgba(223,208,184,.8);width:88px;flex-shrink:0;text-align:right">'+ps+' sér · '+pr+' reps</span>'
       +'</div>'
       +'<div style="display:flex;align-items:center;gap:8px">'
         +'<div style="flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden">'
-          +'<div style="width:'+cPct+'%;height:100%;background:var(--neon);border-radius:3px;transition:width .4s"></div>'
+          +'<div style="width:'+cPct+'%;height:100%;background:rgba(255,170,51,.80);border-radius:3px;transition:width .4s"></div>'
         +'</div>'
         +'<span style="font-size:10px;color:var(--neon);width:88px;flex-shrink:0;text-align:right">'+cs+' sér · '+cr+' reps</span>'
       +'</div>'
@@ -1954,6 +1975,33 @@ function pullProtos(cb){
       saveDB();
     }
   }).catch(function(){}).then(cb||function(){});
+}
+
+
+/* ─────────── EDIT EXERCISE NAME ─────────── */
+function editExName(ei){
+  var ex    = tday(curDay).ex[ei];
+  var nmEl  = document.getElementById('exnm-'+ei);
+  if(!nmEl) return;
+  var prev  = ex.name;
+  nmEl.innerHTML = '<input class="ex-name-input" id="exni-'+ei+'" value="'+esc(prev)+'">';
+  var inp = document.getElementById('exni-'+ei);
+  if(inp){ inp.focus(); inp.select(); }
+  function save(){
+    var v = inp.value.trim() || prev;
+    ex.name = v;
+    saveDB();
+    /* re-render just the name span */
+    nmEl.textContent = v;
+    /* update sub text */
+    var sb = nmEl.closest('.ex-info').querySelector('.ex-sb');
+    if(sb) sb.textContent = (ex.muscle||'—') + ' · ' + ex.sets.length + ' série' + (ex.sets.length!==1?'s':'');
+  }
+  inp.addEventListener('blur', save);
+  inp.addEventListener('keydown', function(e){
+    if(e.key==='Enter')  { inp.blur(); }
+    if(e.key==='Escape') { inp.value=prev; inp.blur(); }
+  });
 }
 
 /* ─────────── FAB SAVE ─────────── */
