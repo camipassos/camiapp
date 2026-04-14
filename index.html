@@ -446,10 +446,18 @@ var DB=(function(){
 })();
 function saveDB(){try{localStorage.setItem('camiDB2',JSON.stringify(DB));}catch(e){}}
 
-function pushTreino(k){fetch(SB_URL+'/rest/v1/treino?on_conflict=user_id,day_key',{method:'POST',headers:sbH(),body:JSON.stringify({user_id:USER_ID,day_key:k,data:DB.t[k]||{ex:[]},updated_at:new Date().toISOString()})}).catch(function(){});}
-function pushDieta(k){fetch(SB_URL+'/rest/v1/dieta?on_conflict=user_id,day_key',{method:'POST',headers:sbH(),body:JSON.stringify({user_id:USER_ID,day_key:k,data:DB.d[k]||{},updated_at:new Date().toISOString()})}).catch(function(){});}
-function pushProto(p){fetch(SB_URL+'/rest/v1/protocolos?on_conflict=user_id,proto_id',{method:'POST',headers:sbH(),body:JSON.stringify({user_id:USER_ID,proto_id:String(p.id),data:p,updated_at:new Date().toISOString()})}).catch(function(){});}
-function pushSetting(k,v){fetch(SB_URL+'/rest/v1/settings?on_conflict=user_id,key',{method:'POST',headers:sbH(),body:JSON.stringify({user_id:USER_ID,key:k,value:v,updated_at:new Date().toISOString()})}).catch(function(){});}
+function sbPush(url,body){
+  return fetch(url,{method:'POST',headers:sbH(),body:JSON.stringify(body)})
+    .then(function(r){
+      if(!r.ok){r.text().then(function(t){console.error('Supabase error',r.status,t);showToast('Erro ao sincronizar ('+r.status+')');});}
+      return r;
+    })
+    .catch(function(e){console.error('Supabase network error',e);showToast('Sem conexao - salvo localmente');});
+}
+function pushTreino(k){sbPush(SB_URL+'/rest/v1/treino?on_conflict=user_id,day_key',{user_id:USER_ID,day_key:k,data:DB.t[k]||{ex:[]},updated_at:new Date().toISOString()});}
+function pushDieta(k){sbPush(SB_URL+'/rest/v1/dieta?on_conflict=user_id,day_key',{user_id:USER_ID,day_key:k,data:DB.d[k]||{},updated_at:new Date().toISOString()});}
+function pushProto(p){sbPush(SB_URL+'/rest/v1/protocolos?on_conflict=user_id,proto_id',{user_id:USER_ID,proto_id:String(p.id),data:p,updated_at:new Date().toISOString()});}
+function pushSetting(k,v){sbPush(SB_URL+'/rest/v1/settings?on_conflict=user_id,key',{user_id:USER_ID,key:k,value:v,updated_at:new Date().toISOString()});}
 function clearCloudTreino(){fetch(SB_URL+'/rest/v1/treino?user_id=eq.'+USER_ID,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).catch(function(){});}
 function clearCloudDieta(){fetch(SB_URL+'/rest/v1/dieta?user_id=eq.'+USER_ID,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).catch(function(){});}
 
@@ -463,8 +471,9 @@ function pullFromCloud(cb){
     .then(function(r){return r.json();}).then(function(rows){
       if(Array.isArray(rows)) rows.forEach(function(r){
         if(r.key==='protoStart'&&r.value){
-          /* only accept if newer than local */
-          if(!DB.protoStart||r.value>DB.protoStart) DB.protoStart=r.value;
+          /* only accept cloud value if it is newer than local AND not in the future */
+          var _today2=(function(){var n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');})();
+          if((!DB.protoStart||r.value>DB.protoStart)&&r.value<=_today2) DB.protoStart=r.value;
         }
       });
       saveDB();
@@ -491,9 +500,10 @@ var curTab='treino',curSub='dias',curDay='',curWk=1,scrollerWk=0,dietOff=0;
 
 /* ── BOOT ── */
 window.addEventListener('DOMContentLoaded',function(){
-  /* enforce protoStart: must not be older than 2025-04-13 */
-  if(!DB.protoStart||DB.protoStart<'2025-04-13'){
-    DB.protoStart='2025-04-13';
+  /* enforce protoStart: if missing or in the past relative to today, reset to today */
+  var _td=(function(){var n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');})();
+  if(!DB.protoStart||DB.protoStart<_td){
+    DB.protoStart=_td;
     saveDB(); pushSetting('protoStart',DB.protoStart);
   }
   curDay=today(); curWk=weekNum(curDay);
@@ -986,7 +996,12 @@ function fabSave(){
     }
   }catch(err){showToast('Erro ao salvar');}
 }
-document.getElementById('view-treino').addEventListener('input',function(){saveDB();});
+var _pushTimer=null;
+document.getElementById('view-treino').addEventListener('input',function(){
+  saveDB();
+  clearTimeout(_pushTimer);
+  _pushTimer=setTimeout(function(){pushTreino(curDay);},1500);
+});
 
 /* ── TOAST ── */
 var _tt;
