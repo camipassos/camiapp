@@ -548,17 +548,19 @@ function musSets(w){
   Object.keys(DB.t).filter(function(k){return weekNum(k)===w;}).forEach(function(k){
     DB.t[k].ex.forEach(function(e){
       var exM=(e.muscle||'').trim();
+      /* count at exercise level: 1 entry per set row */
       e.sets.forEach(function(s){
         var raw=(s.m&&s.m.trim()!=='')?s.m.trim():exM; if(!raw)return;
         var key=normMus(raw);
+        /* keep the first-seen capitalisation as display label */
         if(!c[key])c[key]={label:raw,sets:0,reps:0,vol:0};
         var r=parseFloat(s.r)||0,wt=parseFloat(s.w)||0;
         c[key].sets++;c[key].reps+=r;c[key].vol+=r*wt;
       });
     });
   });
-  var out={};Object.keys(c).forEach(function(k){out[c[k].label]=c[k];});
-  return out;
+  /* return keyed by normalised name to avoid duplicate display labels */
+  return c;
 }
 
 /* ── HEADER ── */
@@ -704,22 +706,22 @@ function renderEvol(){renderMusGrid();renderComp();renderWtChart();}
 function renderMusGrid(){
   var c=musSets(curWk),g=document.getElementById('musGrid'),ks=Object.keys(c);
   if(!ks.length){g.innerHTML='<div class="mus-empty">Nenhum dado para esta semana</div>';return;}
-  g.innerHTML=ks.sort(function(a,b){return(c[b].sets||0)-(c[a].sets||0);}).map(function(m){
-    var s=c[m].sets||0,r=c[m].reps||0;
-    return'<div class="mus-card"><div class="mus-nm">'+m+'</div><div class="mus-n">'+s+'</div><div class="mus-sb">séries</div><div class="mus-sb" style="color:var(--neon2);margin-top:3px">'+r+' reps</div></div>';
+  g.innerHTML=ks.sort(function(a,b){return(c[b].sets||0)-(c[a].sets||0);}).map(function(k){
+    var s=c[k].sets||0,r=c[k].reps||0,lbl=c[k].label||k;
+    return'<div class="mus-card"><div class="mus-nm">'+lbl+'</div><div class="mus-n">'+s+'</div><div class="mus-sb">séries</div><div class="mus-sb" style="color:var(--neon2);margin-top:3px">'+r+' reps</div></div>';
   }).join('');
 }
 function renderComp(){
   var pR=musSets(curWk-1),cR=musSets(curWk),ms=[],seen={};
-  Object.keys(cR).concat(Object.keys(pR)).forEach(function(m){if(!seen[m]){seen[m]=1;ms.push(m);}});
+  Object.keys(cR).concat(Object.keys(pR)).forEach(function(k){if(!seen[k]){seen[k]=1;ms.push(k);}});
   var el=document.getElementById('compRows');
   if(!ms.length){el.innerHTML='<div class="empty">Sem dados para comparar</div>';return;}
-  var cv=function(obj,m){return obj[m]?obj[m].vol||0:0;};
-  var mx=Math.max.apply(null,ms.map(function(m){return Math.max(cv(cR,m),cv(pR,m));}).concat([1]));
+  var cv=function(obj,k){return obj[k]?obj[k].vol||0:0;};
+  var mx=Math.max.apply(null,ms.map(function(k){return Math.max(cv(cR,k),cv(pR,k));}).concat([1]));
   function fv(v){return v>=1000?Math.round(v/100)/10+'k':Math.round(v)+'';}
-  el.innerHTML=ms.map(function(m){
-    var c=cv(cR,m),p=cv(pR,m);
-    return'<div class="comp-row"><div class="comp-mus">'+m+'</div><div class="comp-bars">'
+  el.innerHTML=ms.map(function(k){
+    var c=cv(cR,k),p=cv(pR,k),lbl=(cR[k]||pR[k]).label||k;
+    return'<div class="comp-row"><div class="comp-mus">'+lbl+'</div><div class="comp-bars">'
       +'<div class="comp-bw"><div class="comp-track"><div class="comp-fill prev" style="width:'+Math.round(p/mx*100)+'%"></div></div><div class="comp-lbl">'+fv(p)+'</div></div>'
       +'<div class="comp-bw"><div class="comp-track"><div class="comp-fill curr" style="width:'+Math.round(c/mx*100)+'%"></div></div><div class="comp-lbl">'+fv(c)+'</div></div>'
       +'</div></div>';
@@ -851,10 +853,10 @@ function confirmFinalize(){
       });
     });
   });
+  /* keep normalised key, store label separately for display */
   var musVol={};
   Object.keys(musRaw).forEach(function(k){
-    var lbl=musRaw[k].label;
-    musVol[lbl]={sets:musRaw[k].sets,reps:musRaw[k].reps,vol:musRaw[k].vol};
+    musVol[musRaw[k].label]={sets:musRaw[k].sets,reps:musRaw[k].reps,vol:musRaw[k].vol};
   });
 
   /* diet: last 7 days */
