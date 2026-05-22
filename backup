@@ -500,9 +500,10 @@ var curTab='treino',curSub='dias',curDay='',curWk=1,scrollerWk=0,dietOff=0;
 
 /* ── BOOT ── */
 window.addEventListener('DOMContentLoaded',function(){
-  /* enforce protoStart: if missing or in the past relative to today, reset to today */
-  var _td=(function(){var n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');})();
-  if(!DB.protoStart||DB.protoStart<_td){
+  /* protoStart is set ONLY when finalizing a protocol or on first ever launch.
+     Never overwrite an existing value — that would reset the week counter. */
+  if(!DB.protoStart){
+    var _td=(function(){var n=new Date();return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');})();
     DB.protoStart=_td;
     saveDB(); pushSetting('protoStart',DB.protoStart);
   }
