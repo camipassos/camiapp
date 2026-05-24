@@ -324,14 +324,20 @@ select{appearance:none;-webkit-appearance:none}
     <div class="sec">Séries por grupo muscular</div>
     <div class="mus-grid" id="musGrid"></div>
     <div class="sec">Comparativo de semanas</div>
-    <div class="comp-card">
-      <div class="comp-ttl">Volume por grupo muscular</div>
-      <div id="compRows"></div>
+    <div class="comp-card" style="cursor:pointer" onclick="togSection('compRows','chv-comp')">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="comp-ttl" style="margin-bottom:0">Volume por grupo muscular</div>
+        <div class="chv" id="chv-comp">&#8964;</div>
+      </div>
+      <div id="compRows" style="display:none;margin-top:14px"></div>
     </div>
     <div class="sec">Evolução geral do protocolo</div>
-    <div class="comp-card" id="protoEvol">
-      <div class="comp-ttl">Volume semana 1 → semana atual</div>
-      <div id="protoEvolRows"></div>
+    <div class="comp-card" id="protoEvol" style="cursor:pointer" onclick="togSection('protoEvolRows','chv-protoevol')">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="comp-ttl" id="protoEvolTtl" style="margin-bottom:0">Volume semana 1 → semana atual</div>
+        <div class="chv" id="chv-protoevol">&#8964;</div>
+      </div>
+      <div id="protoEvolRows" style="display:none;margin-top:14px"></div>
     </div>
     <div class="sec">Histórico de peso</div>
     <div class="wt-card">
@@ -770,7 +776,7 @@ function renderProtoEvol(){
       +'</div>';
   }).join('');
   /* update title to show week range */
-  var ttl=document.querySelector('#protoEvol .comp-ttl');
+  var ttl=document.getElementById('protoEvolTtl');
   if(ttl)ttl.textContent='Volume semana 1 → semana '+maxWk;
 }
 function renderWtChart(){
@@ -1001,6 +1007,13 @@ document.addEventListener('click',function(e){
   if(action==='deleteProto'&&pid)deleteProto(pid);
   if(action==='editProto'&&pid){e.stopPropagation();editProto(pid);}
 });
+function togSection(bodyId,chvId){
+  var body=document.getElementById(bodyId),chv=document.getElementById(chvId);
+  if(!body)return;
+  var open=body.style.display!=='none';
+  body.style.display=open?'none':'block';
+  if(chv)chv.classList.toggle('on',!open);
+}
 function togProto(pid){var b=document.getElementById('pb-'+pid),c=document.getElementById('chv-p'+pid);if(b)b.classList.toggle('on');if(c)c.classList.toggle('on');}
 function togSub(id){var b=document.getElementById(id),c=document.getElementById('chv-'+id);if(b)b.classList.toggle('on');if(c)c.classList.toggle('on');}
 function editProto(pid){
