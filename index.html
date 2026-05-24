@@ -326,19 +326,11 @@ select{appearance:none;-webkit-appearance:none}
     <div class="sec">Comparativo de semanas</div>
     <div class="comp-card">
       <div class="comp-ttl">Volume por grupo muscular</div>
-      <div class="leg">
-        <div class="leg-item"><div class="leg-dot" style="background:rgba(255,170,51,.7)"></div>Sem. anterior</div>
-        <div class="leg-item"><div class="leg-dot" style="background:var(--neon)"></div>Sem. atual</div>
-      </div>
       <div id="compRows"></div>
     </div>
     <div class="sec">Evolução geral do protocolo</div>
     <div class="comp-card" id="protoEvol">
       <div class="comp-ttl">Volume semana 1 → semana atual</div>
-      <div class="leg">
-        <div class="leg-item"><div class="leg-dot" style="background:rgba(255,170,51,.7)"></div>Semana 1</div>
-        <div class="leg-item"><div class="leg-dot" style="background:var(--neon)"></div>Semana atual</div>
-      </div>
       <div id="protoEvolRows"></div>
     </div>
     <div class="sec">Histórico de peso</div>
@@ -732,18 +724,17 @@ function renderComp(){
   function fv(v){return v>=1000?Math.round(v/100)/10+'k':Math.round(v)+'';}
   el.innerHTML=ms.map(function(k){
     var c=cv(cR,k),p=cv(pR,k),lbl=(cR[k]||pR[k]).label||k;
-    var pctHtml='';
-    if(p>0&&c>0){
-      var pct=Math.round((c-p)/p*100);
-      var clr=pct>0?'var(--neon)':pct<0?'var(--red)':'var(--mid)';
-      pctHtml='<span style="font-size:9px;font-weight:700;color:'+clr+';margin-left:6px;flex-shrink:0">'+(pct>0?'+':'')+pct+'%</span>';
-    } else if(p===0&&c>0){
-      pctHtml='<span style="font-size:9px;font-weight:700;color:var(--neon);margin-left:6px;flex-shrink:0">Novo</span>';
-    }
-    return'<div class="comp-row"><div class="comp-mus" style="display:flex;align-items:center">'+lbl+pctHtml+'</div><div class="comp-bars">'
-      +'<div class="comp-bw"><div class="comp-track"><div class="comp-fill prev" style="width:'+Math.round(p/mx*100)+'%"></div></div><div class="comp-lbl">'+fv(p)+'</div></div>'
-      +'<div class="comp-bw"><div class="comp-track"><div class="comp-fill curr" style="width:'+Math.round(c/mx*100)+'%"></div></div><div class="comp-lbl">'+fv(c)+'</div></div>'
-      +'</div></div>';
+    if(p===0&&c===0)return'';
+    var pct=p>0?Math.round((c-p)/p*100):null;
+    var clr=pct===null?'var(--neon)':pct>0?'var(--neon)':pct<0?'var(--red)':'var(--mid)';
+    var pctTxt=pct===null?'Novo':(pct>0?'+':'')+pct+'%';
+    return'<div class="comp-row" style="padding:10px 0">'
+      +'<div class="comp-mus">'+lbl+'</div>'
+      +'<div style="flex:1;height:5px;background:var(--s3);border-radius:3px;overflow:hidden;margin:0 12px">'
+        +'<div style="height:100%;border-radius:3px;background:'+clr+';width:'+Math.min(100,Math.abs(pct===null?100:pct))+'%;max-width:100%"></div>'
+      +'</div>'
+      +'<div style="font-size:12px;font-weight:700;color:'+clr+';min-width:44px;text-align:right;flex-shrink:0">'+pctTxt+'</div>'
+      +'</div>';
   }).join('');
 }
 function renderProtoEvol(){
@@ -766,18 +757,17 @@ function renderProtoEvol(){
   ms.sort(function(a,b){return(cv(sN,b)-cv(s1,b))-(cv(sN,a)-cv(s1,a));});
   el.innerHTML=ms.map(function(k){
     var c=cv(sN,k),p=cv(s1,k),lbl=(sN[k]||s1[k]).label||k;
-    var pctHtml='';
-    if(p>0&&c>0){
-      var pct=Math.round((c-p)/p*100);
-      var clr=pct>0?'var(--neon)':pct<0?'var(--red)':'var(--mid)';
-      pctHtml='<span style="font-size:9px;font-weight:700;color:'+clr+';margin-left:6px;flex-shrink:0">'+(pct>0?'+':'')+pct+'%</span>';
-    } else if(p===0&&c>0){
-      pctHtml='<span style="font-size:9px;font-weight:700;color:var(--neon);margin-left:6px;flex-shrink:0">Novo</span>';
-    }
-    return'<div class="comp-row"><div class="comp-mus" style="display:flex;align-items:center">'+lbl+pctHtml+'</div><div class="comp-bars">'
-      +'<div class="comp-bw"><div class="comp-track"><div class="comp-fill prev" style="width:'+Math.round(p/mx*100)+'%"></div></div><div class="comp-lbl">'+fv(p)+'</div></div>'
-      +'<div class="comp-bw"><div class="comp-track"><div class="comp-fill curr" style="width:'+Math.round(c/mx*100)+'%"></div></div><div class="comp-lbl">'+fv(c)+'</div></div>'
-      +'</div></div>';
+    if(p===0&&c===0)return'';
+    var pct=p>0?Math.round((c-p)/p*100):null;
+    var clr=pct===null?'var(--neon)':pct>0?'var(--neon)':pct<0?'var(--red)':'var(--mid)';
+    var pctTxt=pct===null?'Novo':(pct>0?'+':'')+pct+'%';
+    return'<div class="comp-row" style="padding:10px 0">'
+      +'<div class="comp-mus">'+lbl+'</div>'
+      +'<div style="flex:1;height:5px;background:var(--s3);border-radius:3px;overflow:hidden;margin:0 12px">'
+        +'<div style="height:100%;border-radius:3px;background:'+clr+';width:'+Math.min(100,Math.abs(pct===null?100:pct))+'%;max-width:100%"></div>'
+      +'</div>'
+      +'<div style="font-size:12px;font-weight:700;color:'+clr+';min-width:44px;text-align:right;flex-shrink:0">'+pctTxt+'</div>'
+      +'</div>';
   }).join('');
   /* update title to show week range */
   var ttl=document.querySelector('#protoEvol .comp-ttl');
