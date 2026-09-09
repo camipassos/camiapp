@@ -99,10 +99,10 @@ select{appearance:none;-webkit-appearance:none}
 
 .sets-wrap{display:none;padding:0 12px 12px}
 .sets-wrap.on{display:block}
-.th-row{display:grid;grid-template-columns:18px minmax(0,1.3fr) minmax(0,.9fr) 44px 52px 56px 22px;gap:3px;padding-bottom:6px;border-bottom:1px solid var(--bdr);margin-bottom:6px}
+.th-row{display:grid;grid-template-columns:18px minmax(0,1.3fr) 44px 52px 56px 22px;gap:3px;padding-bottom:6px;border-bottom:1px solid var(--bdr);margin-bottom:6px}
 .th{font-size:8px;color:var(--dim);font-weight:600;letter-spacing:1px;text-transform:uppercase;text-align:center}
-.th:nth-child(2),.th:nth-child(3){text-align:left}
-.set-row{display:grid;grid-template-columns:18px minmax(0,1.3fr) minmax(0,.9fr) 44px 52px 56px 22px;gap:3px;margin-bottom:4px;align-items:center}
+.th:nth-child(2){text-align:left}
+.set-row{display:grid;grid-template-columns:18px minmax(0,1.3fr) 44px 52px 56px 22px;gap:3px;margin-bottom:4px;align-items:center}
 .sn{font-size:9px;color:var(--mid);font-weight:600;text-align:center;background:var(--s3);border-radius:var(--rxs);padding:7px 2px}
 .si{background:var(--s3);border:1px solid transparent;border-radius:var(--rxs);padding:6px;font-size:12px;color:var(--white);width:100%;outline:none;text-align:center;transition:border-color .15s}
 .si:focus{border-color:var(--nln)}
@@ -118,6 +118,10 @@ select{appearance:none;-webkit-appearance:none}
 .btn-rm-ex{padding:9px 12px;background:var(--rdim);color:var(--red);border:1px solid rgba(255,51,102,.2);border-radius:var(--rxs);font-size:11px;font-weight:600;cursor:pointer}
 .btn-add-ex{width:100%;padding:14px;background:transparent;color:var(--neon);border:1px dashed var(--nln);border-radius:var(--r);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s;margin-top:4px;cursor:pointer}
 .btn-add-ex:active{background:var(--nfnt)}
+.ex-obs-lbl{font-size:8px;color:var(--mid);font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin:10px 0 5px}
+.ex-obs-in{width:100%;background:var(--s3);border:1px solid transparent;border-radius:var(--rxs);padding:9px 10px;font-size:12px;color:var(--white);font-family:'Sora',sans-serif;outline:none;resize:vertical;min-height:38px;line-height:1.45;transition:border-color .15s}
+.ex-obs-in:focus{border-color:var(--nln)}
+.ex-obs-in::placeholder{color:var(--dim)}
 
 /* drag handle */
 .drag-handle{display:flex;align-items:center;justify-content:center;padding:0 6px;cursor:grab;color:var(--dim);font-size:14px;flex-shrink:0;touch-action:none}
@@ -270,6 +274,10 @@ select{appearance:none;-webkit-appearance:none}
 .proto-ex-row{background:var(--s3);border-radius:var(--rsm);padding:10px 12px;margin-bottom:6px}
 .proto-ex-nm{font-weight:600;font-size:13px;margin-bottom:4px}
 .proto-ex-muscle{font-size:10px;color:var(--mid);margin-bottom:6px}
+.proto-ex-obs{font-size:10px;color:var(--mid);margin-top:8px;padding:6px 9px;background:var(--s2);border-radius:var(--rxs);line-height:1.45}
+.proto-comment-in{width:100%;background:var(--s3);border:1px solid var(--bdr);border-radius:var(--rxs);padding:10px 12px;font-size:12px;color:var(--white);font-family:'Sora',sans-serif;outline:none;resize:vertical;min-height:72px;line-height:1.5;transition:border-color .15s}
+.proto-comment-in:focus{border-color:var(--nln)}
+.proto-comment-in::placeholder{color:var(--dim)}
 .proto-sets-tbl{width:100%;border-collapse:collapse;font-size:11px}
 .proto-sets-tbl th{color:var(--dim);font-weight:600;font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:0 4px 4px;text-align:center}
 .proto-sets-tbl td{color:var(--white);padding:3px 4px;text-align:center;border-top:1px solid var(--dim)}
@@ -623,7 +631,7 @@ function prevKey(){return addD(curDay,-7);}
 function copyPrev(){
   var pk=prevKey(),src=DB.t[pk];
   if(!src||!src.ex.length){showToast('Sem treino na semana anterior');return;}
-  tday(curDay).ex=src.ex.map(function(e){return{name:e.name,muscle:e.muscle,sets:e.sets.map(function(s){return{n:s.n,m:s.m,r:s.r,w:s.w};})};});
+  tday(curDay).ex=src.ex.map(function(e){return{name:e.name,muscle:e.muscle,obs:e.obs||'',sets:e.sets.map(function(s){return{m:s.m,r:s.r,w:s.w};})};});
   saveDB();buildScroller();renderEx();showToast('Treino copiado com séries, reps e peso');
 }
 
@@ -643,7 +651,12 @@ function renderEx(){
     }else{el.innerHTML='<div class="empty">Nenhum exercício para este dia.<br>Toque em + para adicionar.</div>';}
     return;
   }
+  var _obsMigrated=false;
   day.ex.forEach(function(ex,ei){
+    if(ex.obs===undefined||ex.obs===null){
+      var _on=[];ex.sets.forEach(function(s){var t=(s.n||'').trim();if(t&&_on.indexOf(t)<0)_on.push(t);});
+      ex.obs=_on.join(' \u00b7 ');_obsMigrated=true;
+    }
     var vol=eVol(ex),c=document.createElement('div');
     c.className='ex-card';c.setAttribute('draggable','true');c.dataset.ei=ei;
     c.addEventListener('dragstart',onDragStart);c.addEventListener('dragover',onDragOver);
@@ -663,18 +676,20 @@ function renderEx(){
         +'<div class="chv" id="chv-'+ei+'" onclick="togEx('+ei+')">&#8964;</div>'
       +'</div>'
       +'<div class="sets-wrap" id="sw-'+ei+'">'
-        +'<div class="th-row"><span class="th">#</span><span class="th" style="text-align:left">Obs</span><span class="th" style="text-align:left">Grupo Musc.</span><span class="th">Reps</span><span class="th">Peso</span><span class="th">Volume</span><span class="th"></span></div>'
+        +'<div class="th-row"><span class="th">#</span><span class="th" style="text-align:left">Grupo Musc.</span><span class="th">Reps</span><span class="th">Peso</span><span class="th">Volume</span><span class="th"></span></div>'
         +'<div id="rows-'+ei+'"></div>'
+        +'<div class="ex-obs-lbl">Observação</div>'
+        +'<textarea class="ex-obs-in" id="exobs-'+ei+'" placeholder="Anote algo sobre este exercício..." oninput="updExObs('+ei+',this.value)">'+esc(ex.obs||'')+'</textarea>'
         +'<div class="set-acts"><button class="btn-add-set" onclick="addSet('+ei+')">+ Série</button><button class="btn-rm-ex" onclick="rmEx('+ei+')">Remover</button></div>'
       +'</div>';
     el.appendChild(c);renderRows(ei);
   });
+  if(_obsMigrated){saveDB();pushTreino(curDay);}
 }
 function renderRows(ei){var ex=tday(curDay).ex[ei],c=document.getElementById('rows-'+ei);if(!c)return;c.innerHTML=ex.sets.map(function(s,si){return rowHTML(ei,si,s);}).join('');}
 function rowHTML(ei,si,s){
   var vol=sVol(s),opts=MUS.map(function(m){return'<option'+(s.m===m?' selected':'')+'>'+m+'</option>';}).join('');
   return'<div class="set-row"><div class="sn">'+(si+1)+'</div>'
-    +'<input class="si si-l" placeholder="Obs..." value="'+esc(s.n||'')+'" oninput="updSet('+ei+','+si+',\'n\',this.value)">'
     +'<select class="si-sel" onchange="updSet('+ei+','+si+',\'m\',this.value)"><option value="">Grupo...</option>'+opts+'</select>'
     +'<input class="si" type="number" placeholder="0" value="'+(s.r||'')+'" oninput="updSet('+ei+','+si+',\'r\',this.value)">'
     +'<input class="si" type="number" placeholder="0" value="'+(s.w||'')+'" oninput="updSet('+ei+','+si+',\'w\',this.value)">'
@@ -687,7 +702,8 @@ function updSet(ei,si,field,val){
   var vc=document.getElementById('vc-'+ei+'-'+si);if(vc)vc.textContent=sVol(ex.sets[si])>0?fmtN(sVol(ex.sets[si])):'-';
   var eb=document.getElementById('evol-'+ei);if(eb)eb.innerHTML=fmtN(eVol(ex))+'<small> kg</small>';
 }
-function addSet(ei){var ex=tday(curDay).ex[ei];ex.sets.push({n:'',m:ex.muscle||'',r:'',w:''});saveDB();renderRows(ei);document.getElementById('sw-'+ei).classList.add('on');document.getElementById('chv-'+ei).classList.add('on');}
+function addSet(ei){var ex=tday(curDay).ex[ei];ex.sets.push({m:ex.muscle||'',r:'',w:''});saveDB();renderRows(ei);document.getElementById('sw-'+ei).classList.add('on');document.getElementById('chv-'+ei).classList.add('on');}
+function updExObs(ei,val){var ex=tday(curDay).ex[ei];if(!ex)return;ex.obs=val;saveDB();}
 function rmSet(ei,si){var ex=tday(curDay).ex[ei];if(ex.sets.length<=1){showToast('Mínimo 1 série');return;}ex.sets.splice(si,1);saveDB();renderRows(ei);}
 function rmEx(ei){tday(curDay).ex.splice(ei,1);saveDB();renderEx();}
 function editExName(ei){
@@ -707,7 +723,7 @@ function overlayBg(e){if(e.target===document.getElementById('overlay'))closeModa
 function addEx(){
   var nm=document.getElementById('mName').value.trim(),mus=document.getElementById('mMuscle').value;
   if(!nm){showToast('Informe o nome do exercício');return;}
-  tday(curDay).ex.push({name:nm,muscle:mus||'Outros',sets:[{n:'',m:mus||'',r:'',w:''}]});
+  tday(curDay).ex.push({name:nm,muscle:mus||'Outros',obs:'',sets:[{m:mus||'',r:'',w:''}]});
   saveDB();document.getElementById('mName').value='';document.getElementById('mMuscle').value='';
   closeModal();buildScroller();renderEx();
   var idx=tday(curDay).ex.length-1;setTimeout(function(){togEx(idx);},80);
@@ -997,6 +1013,7 @@ function renderProtos(){
         +'<div class="proto-sub"><div class="proto-sub-hdr" data-action="togSub" data-target="psm-'+pid+'">Séries por grupo muscular<div class="chv" id="chv-psm-'+pid+'">&#8964;</div></div><div class="proto-sub-body" id="psm-'+pid+'">'+musHtml+'</div></div>'
         +'<div class="proto-sub"><div class="proto-sub-hdr" data-action="togSub" data-target="ptc-'+pid+'">Treino completo<div class="chv" id="chv-ptc-'+pid+'">&#8964;</div></div><div class="proto-sub-body" id="ptc-'+pid+'">'+treinoHtml+'</div></div>'
         +'<div class="proto-sub"><div class="proto-sub-hdr" data-action="togSub" data-target="pdi-'+pid+'">Dieta<div class="chv" id="chv-pdi-'+pid+'">&#8964;</div></div><div class="proto-sub-body" id="pdi-'+pid+'">'+dietHtml+'</div></div>'
+        +'<div class="proto-sub"><div class="proto-sub-hdr" data-action="togSub" data-target="pcm-'+pid+'">Comentário<div class="chv" id="chv-pcm-'+pid+'">&#8964;</div></div><div class="proto-sub-body" id="pcm-'+pid+'"><textarea class="proto-comment-in" id="pcmin-'+pid+'" placeholder="Escreva um comentário sobre este protocolo..." onclick="event.stopPropagation()" oninput="onProtoComment('+pid+',this.value)" onblur="onProtoCommentSave('+pid+')">'+esc(proto.comment||'')+'</textarea></div></div>'
         +'<div class="proto-acts"><button class="proto-act-btn proto-btn-activate" data-action="activateProto" data-pid="'+pid+'">Reativar</button><button class="proto-act-btn proto-btn-delete" data-action="deleteProto" data-pid="'+pid+'">Excluir</button></div>'
       +'</div>';
     list.appendChild(card);
@@ -1035,6 +1052,17 @@ function saveProtoName(pid,newName){
   proto.name=newName;var nameEl=document.getElementById('pname-'+pid);if(nameEl)nameEl.textContent=newName;
   saveDB();pushProto(proto);showToast('Nome atualizado');
 }
+var _pcmTimer={};
+function onProtoComment(pid,val){
+  var proto=(DB.proto||[]).find(function(p){return p.id===pid;});if(!proto)return;
+  proto.comment=val;saveDB();
+  clearTimeout(_pcmTimer[pid]);
+  _pcmTimer[pid]=setTimeout(function(){pushProto(proto);},1500);
+}
+function onProtoCommentSave(pid){
+  var proto=(DB.proto||[]).find(function(p){return p.id===pid;});if(!proto)return;
+  clearTimeout(_pcmTimer[pid]);saveDB();pushProto(proto);
+}
 function buildFullWorkoutHtml(treino){
   var keys=Object.keys(treino).sort();if(!keys.length)return'<div class="empty" style="padding:8px 0">Sem treinos registrados</div>';
   var html='';
@@ -1043,8 +1071,11 @@ function buildFullWorkoutHtml(treino){
     var d=new Date(k+'T12:00:00');
     html+='<div class="proto-day-block"><div class="proto-day-lbl">'+d.toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short',year:'2-digit'})+'</div>';
     day.ex.forEach(function(ex){
-      var setRows=ex.sets.map(function(s,i){var r=parseFloat(s.r)||0,w=parseFloat(s.w)||0,vol=r*w;return'<tr><td>'+(i+1)+'</td><td>'+(s.n||'—')+'</td><td>'+r+'</td><td>'+w+'</td><td class="vol">'+(vol>0?vol.toLocaleString('pt-BR'):'-')+'</td></tr>';}).join('');
-      html+='<div class="proto-ex-row"><div class="proto-ex-nm">'+esc(ex.name)+'</div><div class="proto-ex-muscle">'+(ex.muscle||'—')+'</div><table class="proto-sets-tbl"><thead><tr><th>#</th><th>Obs</th><th>Reps</th><th>Peso</th><th>Volume</th></tr></thead><tbody>'+setRows+'</tbody></table></div>';
+      var setRows=ex.sets.map(function(s,i){var r=parseFloat(s.r)||0,w=parseFloat(s.w)||0,vol=r*w;return'<tr><td>'+(i+1)+'</td><td>'+r+'</td><td>'+w+'</td><td class="vol">'+(vol>0?vol.toLocaleString('pt-BR'):'-')+'</td></tr>';}).join('');
+      var exObs=(ex.obs||'').trim();
+      if(!exObs){var _on=[];ex.sets.forEach(function(s){var t=(s.n||'').trim();if(t&&_on.indexOf(t)<0)_on.push(t);});exObs=_on.join(' \u00b7 ');}
+      var obsHtml=exObs?'<div class="proto-ex-obs">'+esc(exObs)+'</div>':'';
+      html+='<div class="proto-ex-row"><div class="proto-ex-nm">'+esc(ex.name)+'</div><div class="proto-ex-muscle">'+(ex.muscle||'—')+'</div><table class="proto-sets-tbl"><thead><tr><th>#</th><th>Reps</th><th>Peso</th><th>Volume</th></tr></thead><tbody>'+setRows+'</tbody></table>'+obsHtml+'</div>';
     });
     html+='</div>';
   });
